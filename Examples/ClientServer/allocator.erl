@@ -10,6 +10,23 @@ server(Free, Allocated) ->
 			free(Free, Allocated, From, R)
 	end.
 
+allocate([R|Free], Allocated, From) ->
+	From ! {resource_alloc,{yes,R}},
+	server(Free, [{R,From}|Allocated]);
+
+allocate([], Allocated, From) ->
+	From ! {resource_alloc,no},
+	server([], Allocated).
+
+free(Free, Allocated, From, R) ->
+	case lists:member({R,From}, Allocated) of
+		true ->
+			From ! {resource_alloc,ok},
+			server([R|Free], lists:delete({R,From}, Allocated));
+		false ->
+			From ! {resource_alloc,error}, server(Free, Allocated)
+	end.
+
 start(Resources) ->
 	Pid = spawn(allocator, server, [Resources,[]]),
 	register(resource_alloc, Pid).

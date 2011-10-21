@@ -4,10 +4,10 @@ LC_CTYPE=en_US.UTF-8
 SVN=`which svn`
 
 echo Changing to Bundles directory...
-mkdir -p /Library/Application\ Support/TextMate/Bundles
-cd /Users/vgor/Library/Application\ Support/TextMate/Bundles
+mkdir -p /Users/macserver/Library/Application\ Support/TextMate/Bundles
+cd /Users/macserver/Library/Application\ Support/TextMate/Bundles
 
-if [ -d /Users/vgor/Library/Application\ Support/TextMate/Bundles/Erlang.tmbundle ]; then
+if [ -d /Users/macserver/Library/Application\ Support/TextMate/Bundles/Erlang.tmbundle ]; then
  echo Erlang bundle already exists - updating...
  $SVN up Erlang.tmbundle
 else

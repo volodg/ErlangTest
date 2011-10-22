@@ -1,6 +1,8 @@
 
 <erl>
 	out(Arg) ->
-%		{html, "Funky Stuff"}.
-		{html, foobar:test(Arg)}.
+		ex_server:echo_test( "Sex" ),
+		io:fwrite( "nodes: ~p~n", [ nodes() ] ),
+		{html, "Funky Stuff"}.
+%		{html, foobar:test(Arg)}.
 </erl>

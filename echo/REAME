@@ -1,16 +1,15 @@
 
-1. yaws --daemon
-1. $HOME/yaws.conf
+1. erl -sname ex_server
+% Node: ex_server@Mac-Pro-Vladimir
+2. c(ex_server).
+3. ex_server:start_link().
+4. ex_server:echo_test( "Sex" ).
 
-config - logdir = $HOME/Dropbox/erlang/ErlangTest/echo/yaws/log
+///////////////////////////////////////////////
 
-logdir = /Users/vgor/Dropbox/erlang/ErlangTest/echo/yaws/log
-ebin_dir = /Users/vgor/Dropbox/erlang/ErlangTest/echo/yaws/ebin
-include_dir = /Users/vgor/Dropbox/erlang/ErlangTest/echo/yaws/include
+1. yaws
 
-http://localhost:8000/
-
-////////////////////////////////////////////////
+///////////////////////////////////////////////
 
 2. Install
  cd yaws
@@ -23,14 +22,3 @@ Alternatively, to make a proper install
 # ./configure --localstatedir=/var --sysconfdir=/etc
 # make
 # make install
-
-////////////////////////////////////////////////
-
-Yaws: Using config file /usr/local/etc/yaws/yaws.conf
-Cannot open "/usr/local/var/log/yaws/Mac-Pro-Vladimir.local.auth"
-Cannot open "/usr/local/var/log/yaws/Mac-Pro-Vladimir.local.access"
-Cannot open "/usr/local/var/log/yaws/Mac-Pro-Vladimir.local.auth"
-Cannot open "/usr/local/var/log/yaws/Mac-Pro-Vladimir.local.access"
-Cannot open "/usr/local/var/log/yaws/localhost.auth"
-Cannot open "/usr/local/var/log/yaws/localhost.access"
-Ctlfile : /Users/vgor/.yaws/yaws/default/CTL

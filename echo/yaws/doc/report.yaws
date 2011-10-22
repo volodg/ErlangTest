@@ -1,0 +1,32 @@
+
+<erl>
+	out(Arg) ->
+		bn_server:push(),
+		Self = self(),
+		%spawn(fun() ->
+		%		rec_loop( Self )
+		%	end),
+		%{streamcontent, "text/plain", <<>>}.
+		rec_loop( Self ).
+
+	finish() ->
+		true.
+
+	rec_loop( YawsPid ) ->
+		receive
+			{ report, Report } ->
+				%{ html, Report },
+				%send chunk,
+				io:fwrite( "report: ~p~n", [ Report ] ),
+				%yaws_api:stream_chunk_deliver(YawsPid, list_to_binary(Report) ),
+				rec_loop( YawsPid );
+			finish ->
+				io:fwrite( "report finished~n" ),
+				%yaws_api:stream_chunk_end(YawsPid),
+				finish();
+			Other ->
+				{ html, "error" }
+		after 10000000 ->
+			{ html, "timeout" }
+		end.
+</erl>

@@ -2,6 +2,14 @@
 1. yaws --daemon
 1. $HOME/yaws.conf
 
+config - logdir = $HOME/Dropbox/erlang/ErlangTest/echo/yaws/log
+
+logdir = /Users/vgor/Dropbox/erlang/ErlangTest/echo/yaws/log
+ebin_dir = /Users/vgor/Dropbox/erlang/ErlangTest/echo/yaws/ebin
+include_dir = /Users/vgor/Dropbox/erlang/ErlangTest/echo/yaws/include
+
+http://localhost:8000/
+
 ////////////////////////////////////////////////
 
 2. Install

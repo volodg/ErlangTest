@@ -1,0 +1,6 @@
+
+<erl>
+	out(Arg) ->
+%		{html, "Funky Stuff"}.
+		{html, foobar:test(Arg)}.
+</erl>

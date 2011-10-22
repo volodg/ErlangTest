@@ -1,0 +1,28 @@
+
+1. yaws --daemon
+1. $HOME/yaws.conf
+
+////////////////////////////////////////////////
+
+2. Install
+ cd yaws
+# autoconf; ./configure; make; make local_install
+    
+Alternatively, to make a proper install
+
+# cd yaws
+# ./configure --help
+# ./configure --localstatedir=/var --sysconfdir=/etc
+# make
+# make install
+
+////////////////////////////////////////////////
+
+Yaws: Using config file /usr/local/etc/yaws/yaws.conf
+Cannot open "/usr/local/var/log/yaws/Mac-Pro-Vladimir.local.auth"
+Cannot open "/usr/local/var/log/yaws/Mac-Pro-Vladimir.local.access"
+Cannot open "/usr/local/var/log/yaws/Mac-Pro-Vladimir.local.auth"
+Cannot open "/usr/local/var/log/yaws/Mac-Pro-Vladimir.local.access"
+Cannot open "/usr/local/var/log/yaws/localhost.auth"
+Cannot open "/usr/local/var/log/yaws/localhost.access"
+Ctlfile : /Users/vgor/.yaws/yaws/default/CTL

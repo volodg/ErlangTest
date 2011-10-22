@@ -1,9 +1,13 @@
 
-1. erl -sname ex_server
-% Node: ex_server@Mac-Pro-Vladimir
-2. c(ex_server).
-3. ex_server:start_link().
-4. ex_server:echo_test( "Sex" ).
+CLIENT
+yaws -sname trade
+
+SERVER
+1. erl -sname server
+% Node: server@Mac-Pro-Vladimir
+2. c(bn_server).
+3. bn_server:start().
+4. bn_server:stop().
 
 ///////////////////////////////////////////////
 

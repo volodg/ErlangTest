@@ -37,7 +37,7 @@ echo_test(Msg) ->
 	io:fwrite( "In: ~p~n", [ "method called" ] ),
 	%Res = gen_server:call(?SERVER, {echo, Msg}),
 	io:fwrite( "SERVER: ~p~n", [ ?SERVER ] ),
-	Res = gen_server:call( { ?SERVER, 'server@localhost:8001' }, {echo, Msg}),
+	Res = gen_server:call( { ?SERVER, 'server@Mac-Pro-Vladimir' }, {echo, Msg}),
 	%Res = spawn( 'server@localhost:8001', gen_server, call, [ ?SERVER, {echo, Msg} ]),
 	io:fwrite( "Out: ~p~n", [ Res ] ),
 	Res.

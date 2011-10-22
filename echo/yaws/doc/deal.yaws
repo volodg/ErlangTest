@@ -1,0 +1,12 @@
+
+<erl>
+	out(Arg) ->
+		Resp = bn_server:echo( "Echo test" ) ,
+		ToReturn = case Resp of
+			{ ok, RespMsg } -> RespMsg;
+			{ error, ErrorDesc } -> "Server Error";
+			timeout -> "Server Timeout";
+			_ -> "Undefined issue"
+		end,
+		{ html, ToReturn }.
+</erl>

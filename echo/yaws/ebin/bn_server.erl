@@ -4,7 +4,7 @@
 -export([start/0,stop/0,loop/1]).
 
 %public api
--export([echo/1,push/0]).
+-export([echo/1,push/0,deal/4]).
 
 %TODO move to template
 -define(SRV_NODE, 'server@Mac-Pro-Vladimir').
@@ -13,6 +13,16 @@
 %%====================================================================
 %% PUBLIC API
 %%====================================================================
+
+%returns { ok, Msg }, timeout or { error, ErrorDescr }
+%pass Node name as arg
+deal( Instrument, Time, Price, Amount ) ->
+	io:fwrite( "Instrument: ~p~n", [Instrument] ),
+	io:fwrite( "Time: ~p~n", [Time] ),
+	io:fwrite( "Price: ~p~n", [Price] ),
+	io:fwrite( "Amount: ~p~n", [Amount] ),
+	io:fwrite( "------------------------~n" ),
+	{ reply, "Good" }.
 
 %returns { ok, Msg }, timeout or { error, ErrorDescr }
 %pass Node name as arg

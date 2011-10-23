@@ -1,12 +1,71 @@
 
 <erl>
+	%request example: http://localhost:8000/deal.yaws?date=2234:234:234:324:34:234&instrument=echo2&price=10.6&amount=200
 	out(Arg) ->
-		Resp = bn_server:echo( "Echo test" ) ,
-		ToReturn = case Resp of
-			{ ok, RespMsg } -> RespMsg;
-			{ error, ErrorDesc } -> "Server Error";
-			timeout -> "Server Timeout";
-			_ -> "Undefined issue"
-		end,
-		{ html, ToReturn }.
+		case catch parsed_args(Arg) of
+			{ Instrument, Time, Price, Amount } ->
+				Response = bn_server:deal( Instrument, Time, Price, Amount ),
+				case Response of
+					{ reply, Resp } ->
+						{ html, Resp };
+					{ error, Descr } ->
+						{ html, Descr }
+				end;
+			{ error, Descr } ->
+				{ html, Descr }
+		end.
+
+	%no strong arguments validation
+	date_arg(Arg) ->
+		QDateTime = queryvar(Arg, date),
+		DateTimeString = case QDateTime of
+			{ ok, DateTimeStr } ->
+				DateTimeStr;
+			undefined ->
+				throw({error, "Empty date parameter, please specify deal date like this: ?date=year:month:day:hours:minutes:seconds"})
+			end,
+		SplitDateTime = string:tokens( DateTimeString, ":" ),
+		case SplitDateTime of
+			[ Year, Month, Day, Hours, Minutes, Seconds ] ->
+				Date = { list_to_integer(Year), list_to_integer(Month), list_to_integer(Day) },
+				Time = { list_to_integer(Hours), list_to_integer(Minutes), list_to_integer(Seconds) },
+				{ Date, Time };
+			_Other ->
+				throw({error, "Invalid date parameter, please specify deal date like this: ?date=year:month:day:hours:minutes:seconds"})
+		end.
+
+	instrument_arg(Arg) ->
+		QInstrument = queryvar(Arg, instrument),
+		case QInstrument of
+			{ ok, InstrumentStr } ->
+				InstrumentStr;
+			undefined ->
+				throw({error, "Empty instrument parameter, please specify instrument like this: ?instrument=echo1"})
+			end.
+
+	price_arg(Arg) ->
+		QPrice = queryvar(Arg, price),
+		case QPrice of
+			{ ok, PriceStr } ->
+				list_to_float(PriceStr);
+			undefined ->
+				throw({error, "Empty price parameter, please specify instrument like this: ?price=10.3"})
+		end.
+
+	amount_arg(Arg) ->
+		QAmount = queryvar(Arg, amount),
+		case QAmount of
+			{ ok, AmountStr } ->
+				list_to_integer(AmountStr);
+			undefined ->
+				throw({error, "Empty amount parameter, please specify instrument like this: ?amount=200"})
+		end.
+
+	parsed_args(Arg) ->
+		DateTime = date_arg(Arg),
+		Instrument = instrument_arg(Arg),
+		Price = price_arg(Arg),
+		Amount = amount_arg(Arg),
+
+		{ Instrument, DateTime, Price, Amount }.
 </erl>

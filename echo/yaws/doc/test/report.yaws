@@ -1,0 +1,43 @@
+
+<erl>
+	% test in shell:
+	% 1. rm -f report.yaws*; wget -q localhost:8000/report.yaws &
+	% 2. tail -f report.yaws
+	out(Arg) ->
+		Self = self(),
+		Pid = spawn(fun() ->
+				rec_loop( Arg#arg.clisock )
+			end),
+		[ {header, {content_length, -1}},
+			{header, {"Transfer-Encoding", "chunked"} },
+			{header, {"Connection", "keep-alive"} },
+			{streamcontent_from_pid, "text/plain", Pid}].
+
+	rec_loop(Sock) ->
+		receive
+			{discard, YawsPid} ->
+				yaws_api:stream_process_end(Sock, YawsPid);
+			{ok, YawsPid} ->
+				bn_client:subscribe(),
+				rec_loop(Sock, YawsPid);
+			Other ->
+				{ html, "error" }
+		end,
+		exit(normal).
+
+	rec_loop( Socket, YawsPid ) ->
+		receive
+			{ report, Report } ->
+				SendString = io_lib:format("~s", [ Report ] ),
+				yaws_api:stream_process_deliver_chunk(Socket, SendString),
+				rec_loop( Socket, YawsPid );
+			finish ->
+				yaws_api:stream_process_deliver_final_chunk(Socket, <<>>),
+				yaws_api:stream_process_end(closed, YawsPid),
+				exit(normal);
+			Other ->
+				{ html, "error" }
+		after 10000000 ->%TODO remove this
+			{ html, "timeout" }
+		end.
+</erl>

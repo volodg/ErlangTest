@@ -55,41 +55,28 @@ send_report( To, Num ) ->
 	To ! { report, Str }.
 
 %validate arguments before calling this method
-process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, From, { Instrument, _Time, _Price, _Amount } ) ->
+process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, DatesSettings, From, { Instrument, _Time, _Price, _Amount } ) ->
 	{ NewDealerPidAndExpDateByInstrument, InstrumentDealerPid } = case dict:find( Instrument, DealerPidAndExpDateByInstrument ) of
 		{ ok, { DealerPid, _ExpirationDate } } ->
+		    %TODO check _ExpirationDate
 			{ DealerPidAndExpDateByInstrument, DealerPid };
 		error ->
-			DealerPid = spawn( bn_dealer, dealer, [Instrument] ),
-			%TODO pass exp_date_todo according to duration and current date
-			NewState = dict:store( Instrument, { DealerPid, exp_date_todo }, DealerPidAndExpDateByInstrument ),
+			ExpirationDatetime = datetime:nearestExpirationDatetime( DatesSettings ),
+			DealerPid = spawn( bn_dealer, dealer, [Instrument, ExpirationDatetime] ),
+			NewState = dict:store( Instrument, { DealerPid, ExpirationDatetime }, DealerPidAndExpDateByInstrument ),
 			{ NewState, DealerPid }
 	end,
 	From ! { dealer_pid, InstrumentDealerPid },
 	NewDealerPidAndExpDateByInstrument.
 
-%validate arguments here
 process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, DatesSettings, From, { Instrument, Time, Price, Amount } ) ->
-	{ StartDatetime, EndDatetime, Duration } = DatesSettings,
+	ValidDealArgs = bn_common:validate_deal_args( Instruments, DatesSettings, Instrument, Time, Price, Amount ),
 
-	ValidDatetime   = datetime:valid_datetime( Time ),
-	ValidInstrument = sets:is_element( Instrument, Instruments ),
-
-	NewDealerPidAndExpDateByInstrument = case { ValidDatetime, ValidInstrument } of
-		{ true, true } ->
-			ValidDealDateRange = datetime:validDateTimeWithDateRangeAndDuration( Time, StartDatetime, EndDatetime, Duration ),
-			case ValidDealDateRange of
-				true ->
-					process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, From, { Instrument, Time, Price, Amount } );
-				false ->
-					From ! { error, "Invalid date: out of range deal dates" },
-					DealerPidAndExpDateByInstrument
-			end;
-		{ false, _ } ->
-			From ! { error, "Invalid date format" },
-			DealerPidAndExpDateByInstrument;
-		{ _, false } ->
-			From ! { error, "Invalid instrument name" },
+	NewDealerPidAndExpDateByInstrument = case ValidDealArgs of
+		true ->
+			process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, DatesSettings, From, { Instrument, Time, Price, Amount } );
+		{ error, ValidationErrorDescr } ->
+			From ! { error, ValidationErrorDescr },
 			DealerPidAndExpDateByInstrument
 	end,
 	bn_server:loop( NewDealerPidAndExpDateByInstrument, Instruments, DatesSettings ).

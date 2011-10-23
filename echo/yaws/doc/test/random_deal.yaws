@@ -13,9 +13,11 @@
 
 	%no strong arguments validation
 	current_datetime() ->
+		%datetime:addSecondToDatetime( 60, { date(), time() } ).
 		{ date(), time() }.
 
 	random_instrument() ->
+		%"echo23".
 		lists:append( "echo", integer_to_list(random:uniform(10)) ).
 
 	random_price() ->

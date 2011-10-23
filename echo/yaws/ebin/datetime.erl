@@ -2,7 +2,7 @@
 
 -export([addSecondToDatetime/2,datetimeWithinDatetimes/3,datetimeEarlierThanDatetime/2
 ,nearestDatetimeLessThanNow/2,validDateTimeWithDateRangeAndDuration/4
-,valid_datetime/1]).
+,valid_datetime/1,nearestExpirationDatetime/1]).
 
 addSecondToDatetime(Seconds, Datetime) ->
 	StartSeconds = calendar:datetime_to_gregorian_seconds( Datetime ),
@@ -38,6 +38,11 @@ nearestDatetimeLessThanNow( StartDateTime, Duration ) ->
 		true ->
 			StartDateTime
 	end.
+
+nearestExpirationDatetime( DatesSettings ) ->
+	{ StartDatetime, _EndDatetime, Duration } = DatesSettings,
+	CurrentStartTime = nearestDatetimeLessThanNow( StartDatetime, Duration ),
+	addSecondToDatetime( Duration, CurrentStartTime ).
 
 validDateTimeWithDateRangeAndDuration( Datetime, StartDatetime, EndDatetime, Duration ) ->
 	NowDatetime = { date(), time() },

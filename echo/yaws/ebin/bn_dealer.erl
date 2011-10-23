@@ -1,6 +1,8 @@
 -module(bn_dealer).
 
--export([dealer/1]).
+-export([dealer/2]).
+
+-include("bn_config.hrl").
 
 process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } ) ->
 	{ _OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = State,
@@ -34,21 +36,35 @@ process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } )
 
 	NewState.
 
-%TODO validate Instrument here
-loop( DealerInstrument, State ) ->
+%TODO validate Only date if for performance issue,
+% other arguments validated by bn_server or vise versa
+loop( DealerInstrument, ExpirationDatetime, State ) ->
 	receive
-		{ From, { _Instrument, _Time, _Price, Amount } } when Amount =< 0 ->
-			From ! { error, "Amount can nor be equal or less then zero" },
-			loop( DealerInstrument, State );
-		{ From, { DealerInstrument, Time, Price, Amount } } ->
-			loop( DealerInstrument, process_deal( State, From, { DealerInstrument, Time, Price, Amount } ) );
+		{ From, { Instrument, Time, Price, Amount } } ->
+			Instruments = sets:from_list( [ DealerInstrument ] ),
+
+			DurationInSeconds = ?REPORT_DURATION_SEC,
+			StartDatetime = datetime:addSecondToDatetime( -DurationInSeconds, ExpirationDatetime ),
+			DatesSettings = { StartDatetime, ExpirationDatetime, DurationInSeconds },
+
+			ValidDealArgs = bn_common:validate_deal_args( Instruments, DatesSettings, Instrument, Time, Price, Amount ),
+
+			NewState = case ValidDealArgs of
+				true ->
+					process_deal( State, From, { Instrument, Time, Price, Amount } );
+				{ error, ValidationErrorDescr } ->
+					From ! { error, ValidationErrorDescr },
+					State
+			end,
+
+			loop( DealerInstrument, ExpirationDatetime, NewState );
 		Other ->
 			%TODO fix this
-			io:fwrite( "Unhandled msg in dealer: ~p~n", [Other] ),
-			loop( DealerInstrument, State )
+			io:fwrite( "Unhandled msg in dealer (should not happen): ~p~n", [Other] ),
+			loop( DealerInstrument, ExpirationDatetime, State )
 	end.
 
-dealer( InstrumentName ) ->
+dealer( InstrumentName, ExpirationDatetime ) ->
 	%init here timer, state and etc
 	io:fwrite( "Start Dealer For Instrument: ~p~n", [InstrumentName] ),
 	TotalAmount = 0,
@@ -57,4 +73,4 @@ dealer( InstrumentName ) ->
 	MinPrice = 0,
 	MaxPrice = 0,
 	InitState = { open_time_todo, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
-	loop( InstrumentName, InitState ).
+	loop( InstrumentName, ExpirationDatetime, InitState ).

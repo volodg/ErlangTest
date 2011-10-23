@@ -1,0 +1,25 @@
+calendar:universal_time().
+calendar:local_time().
+calendar:time_difference()
+
+now_to_datetime(Now)
+now_to_local_time(Now)
+
+calendar:time_to_seconds(time()).
+
+{{2011,10,23},{10,40,18}}
+
+http://localhost:8000/report.yaws
+
+http://localhost:8000/echo.yaws?echo=test
+
+http://localhost:8000/test/random_deal.yaws
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+1. Separate dealer for separate instrument
+
+1.1 valiadte date
+2. Recriate dealer when expired
+3. Dealer has timeout end exit normal when it is
+4, Send report from dealer and push

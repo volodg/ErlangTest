@@ -1,8 +1,13 @@
 -module(datetime).
 
--export([addSecondToDatetime/2,datetimeWithinDatetimes/3,datetimeEarlierThanDatetime/2
-,nearestDatetimeLessThanNow/2,validDateTimeWithDateRangeAndDuration/2
-,valid_datetime/1,nearestExpirationDatetime/1]).
+-export([addSecondToDatetime/2
+,datetimeWithinDatetimes/3
+,datetimeEarlierThanDatetime/2
+,nearestDatetimeLessThanNow/2
+,validDateTimeWithDateRangeAndDuration/2
+,valid_datetime/1
+,nearestExpirationDatetime/1
+,datetime_difference_in_seconds/2]).
 
 addSecondToDatetime(Seconds, Datetime) ->
 	StartSeconds = calendar:datetime_to_gregorian_seconds( Datetime ),
@@ -27,6 +32,11 @@ datetimeWithinDatetimes( Datetime, StartDatetime, EndDatetime ) ->
 		_Other ->
 			false
 	end.
+
+datetime_difference_in_seconds( FromDatetime, ToDatetime ) ->
+	FromDatetimeSeconds = calendar:datetime_to_gregorian_seconds( FromDatetime ),
+	ToDatetimeSeconds = calendar:datetime_to_gregorian_seconds( ToDatetime ),
+	ToDatetimeSeconds - FromDatetimeSeconds.
 
 nearestDatetimeLessThanNow( StartDateTime, Duration ) ->
 	NowDateTime = { date(), time() },

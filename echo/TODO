@@ -33,3 +33,5 @@ millisecondsToDate(Milliseconds) ->
 4, Send report from dealer and push
 
 5. remove Pid when exit or crash from DealerPidAndExpDateByInstrument
+
+6. Send empty reports also ?!

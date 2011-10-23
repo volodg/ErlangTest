@@ -36,9 +36,7 @@ process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } )
 
 	NewState.
 
-%TODO validate Only date if for performance issue,
-% other arguments validated by bn_server or vise versa
-loop( DealerInstrument, ExpirationDatetime, State ) ->
+clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
 	receive
 		{ From, { Instrument, Time, Price, Amount } } ->
 			Instruments = sets:from_list( [ DealerInstrument ] ),
@@ -64,8 +62,24 @@ loop( DealerInstrument, ExpirationDatetime, State ) ->
 			loop( DealerInstrument, ExpirationDatetime, State )
 	end.
 
+%TODO validate Only date if for performance issue,
+% other arguments validated by bn_server or vise versa
+loop( DealerInstrument, ExpirationDatetime, State ) ->
+	%TODO does it's tail recursion if callback used???
+	bn_common:priority_receive( send_report, fun() ->
+		clients_loop( DealerInstrument, ExpirationDatetime, State )
+		end ),
+	%send report here
+	io:fwrite( "TODO send report here~n" ),
+	exit( normal ).
+
 dealer( InstrumentName, ExpirationDatetime ) ->
 	%init here timer, state and etc
+
+	%TODO if { date(), time() } > ExpirationDatetime ????
+	Delay = datetime:datetime_difference_in_seconds( { date(), time() }, ExpirationDatetime ) * 1000,
+	timer:send_after( Delay, send_report ),
+
 	io:fwrite( "Start Dealer For Instrument: ~p~n", [InstrumentName] ),
 	TotalAmount = 0,
 	OpenPrice = 0,

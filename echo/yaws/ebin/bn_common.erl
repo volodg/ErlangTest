@@ -1,6 +1,6 @@
 -module(bn_common).
 
--export([validate_deal_args/6]).
+-export([validate_deal_args/6,priority_receive/2]).
 
 valid_price( Price ) ->
 	case is_number( Price ) of
@@ -51,4 +51,12 @@ validate_deal_args( Instruments, DatesSettings, Instrument, Time, Price, Amount 
 			{ error, "Invalid Price, It should be larger then zero" };
 		{ _, _, _, false } ->
 			{ error, "Invalid Amount, It should be larger then zero and integer" }
+	end.
+
+priority_receive( Term, Otherwise ) ->
+	receive
+		Term ->
+			Term
+	    after 0 ->
+	    	Otherwise()
 	end.

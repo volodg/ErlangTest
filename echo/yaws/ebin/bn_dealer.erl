@@ -63,7 +63,7 @@ clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
 		send_report ->
 			send_report();
 		Other ->
-			%TODO fix this
+			%TODO fix this if happen
 			io:fwrite( "Unhandled msg in dealer (should not happen): ~p~n", [Other] ),
 			loop( DealerInstrument, ExpirationDatetime, State )
 	end.

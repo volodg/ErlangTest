@@ -11,14 +11,28 @@
 
 %returns { ok, Msg }, timeout or { error, ErrorDescr }
 %pass Node name as arg
+dealer_response() ->
+	receive
+		{ reply, Response } ->
+			{ ok, Response };
+		{ error, ErrorDescr } ->
+			{ error, ErrorDescr };
+		timeout ->%TODO remove???
+			timeout
+	after 500 ->
+		timeout
+	end.
+
 deal( Instrument, Time, Price, Amount ) ->
-%	{ ?SRV_NAME, ?SRV_NODE } ! { echo, self(), Msg },
-	io:fwrite( "Instrument: ~p~n", [Instrument] ),
-	io:fwrite( "Time: ~p~n", [Time] ),
-	io:fwrite( "Price: ~p~n", [Price] ),
-	io:fwrite( "Amount: ~p~n", [Amount] ),
-	io:fwrite( "------------------------~n" ),
-	{ reply, "Good" }.
+	{ ?SRV_NAME, ?SRV_NODE } ! { get_dealer, self(), { Instrument, Time, Price, Amount } },
+	receive
+		%TODO check errors also of validation time for example
+		{ dealer_pid, DealerPid } ->
+			DealerPid ! { self(), { Instrument, Time, Price, Amount } },
+			dealer_response()
+	after 500 ->
+		timeout
+	end.
 
 %returns { ok, Msg }, timeout or { error, ErrorDescr }
 %pass Node name as arg
@@ -30,7 +44,7 @@ echo( Msg ) ->
 		{ error, ErrorDescr } ->
 			{ error, ErrorDescr };
 		timeout ->%TODO remove???
-			{ error, "srv timeout" }
+			timeout
 	after 500 ->
 		timeout
 	end.

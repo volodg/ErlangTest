@@ -34,6 +34,15 @@ loop(State) ->
 			io:fwrite( "Exit normally~n" ),
 			true;
 
+		%get dealer for arguments
+		{ get_dealer, From, { _Instrument, _Time, _Price, _Amount } } ->
+			%TODO validate arguments
+			%TODO separate dealer for separate instrument
+			%TODO pass to daler his timeout
+			DealerPid = spawn( bn_dealer, dealer, [] ),
+			From ! { dealer_pid, DealerPid };
+
+		% push notifications
 		{ push_subscribe, From } ->
 			io:fwrite( "srv: push_subscribed~n" ),
 			run_report_timer( From, 5 ),

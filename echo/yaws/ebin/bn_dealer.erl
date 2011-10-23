@@ -35,14 +35,17 @@ process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } )
 	NewState.
 
 %TODO validate Instrument here
-loop( State ) ->
+loop( DealerInstrument, State ) ->
 	receive
-		{ From, { Instrument, Time, Price, Amount } } ->
-			loop( process_deal( State, From, { Instrument, Time, Price, Amount } ) );
+		{ From, { _Instrument, _Time, _Price, Amount } } when Amount =< 0 ->
+			From ! { error, "Amount can nor be equal or less then zero" },
+			loop( DealerInstrument, State );
+		{ From, { DealerInstrument, Time, Price, Amount } } ->
+			loop( DealerInstrument, process_deal( State, From, { DealerInstrument, Time, Price, Amount } ) );
 		Other ->
 			%TODO fix this
 			io:fwrite( "Unhandled msg in dealer: ~p~n", [Other] ),
-			loop( State )
+			loop( DealerInstrument, State )
 	end.
 
 dealer( InstrumentName ) ->
@@ -54,4 +57,4 @@ dealer( InstrumentName ) ->
 	MinPrice = 0,
 	MaxPrice = 0,
 	InitState = { open_time_todo, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
-	loop( InitState ).
+	loop( InstrumentName, InitState ).

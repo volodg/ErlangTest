@@ -23,9 +23,10 @@ init() ->
 stop() ->
 	?SRV_NAME ! stop.
 
-restart() ->
-	stop(),
-	start().
+%restart() ->
+%	stop(),
+%	receive stoped
+%	start().
 
 run_report_timer( From, Num ) ->
 	Delay = 2000,

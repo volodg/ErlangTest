@@ -29,7 +29,9 @@ deal( Instrument, Time, Price, Amount ) ->
 		%TODO check errors also of validation time for example
 		{ dealer_pid, DealerPid } ->
 			DealerPid ! { self(), { Instrument, Time, Price, Amount } },
-			dealer_response()
+			dealer_response();
+		{ error, ErrorDescr } ->
+			{ error, ErrorDescr }
 	after 500 ->
 		timeout
 	end.

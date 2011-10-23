@@ -14,6 +14,12 @@ start() ->
 	Pid = spawn( ?SRV_NAME, init, [] ),
 	register( ?SRV_NAME, Pid).
 
+init() ->
+	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
+	DealerPidAndExpDateByInstrument = dict:new(),
+	Instruments = sets:from_list( ?INSTRUMENTS ),
+	loop( DealerPidAndExpDateByInstrument, Instruments ).
+
 stop() ->
 	?SRV_NAME ! stop.
 
@@ -25,11 +31,16 @@ send_report( To, Num ) ->
 	Str = integer_to_list(Num),
 	To ! { report, Str }.
 
-init() ->
-	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
-	DealerPidAndExpDateByInstrument = dict:new(),
-	Instruments = sets:from_list( ?INSTRUMENTS ),
-	loop( DealerPidAndExpDateByInstrument, Instruments ).
+%is_element(Element, Set) -> boolean()
+process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, From, { Instrument, _Time, _Price, _Amount } ) ->
+	case sets:is_element( Instrument, Instruments ) of
+		true ->
+			DealerPid = spawn( bn_dealer, dealer, [] ),
+			From ! { dealer_pid, DealerPid };
+		false ->
+			From ! { error, "Invalid instrument name" }
+	end,
+	bn_server:loop( DealerPidAndExpDateByInstrument, Instruments ).
 
 loop( DealerPidAndExpDateByInstrument, Instruments ) ->
 	receive
@@ -41,10 +52,8 @@ loop( DealerPidAndExpDateByInstrument, Instruments ) ->
 			true;
 
 		%get dealer for arguments
-		{ get_dealer, From, { _Instrument, _Time, _Price, _Amount } } ->
-			DealerPid = spawn( bn_dealer, dealer, [] ),
-			From ! { dealer_pid, DealerPid },
-			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments );
+		{ get_dealer, From, { Instrument, Time, Price, Amount } } ->
+			process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, From, { Instrument, Time, Price, Amount } );
 
 		% test push notifications
 		{ push_subscribe, From } ->

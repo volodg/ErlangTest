@@ -1,0 +1,37 @@
+
+<erl>
+	%request example: http://localhost:8000/deal.yaws?date=2234:234:234:324:34:234&instrument=echo2&price=10.6&amount=200
+	out(Arg) ->
+		{ Instrument, Time, Price, Amount } = random_args(),
+		Response = bn_server:deal( Instrument, Time, Price, Amount ),
+		case Response of
+			{ reply, Resp } ->
+				{ html, Resp };
+			{ error, Descr } ->
+				{ html, Descr }
+		end.
+
+	%no strong arguments validation
+	current_datetime() ->
+		{ date(), time() }.
+
+	random_instrument() ->
+		lists:append( "echo", integer_to_list(random:uniform(10)) ).
+
+	random_price() ->
+		erlang:round( ( random:uniform() + 1 ) * 100 ) / 100.
+
+	random_amount() ->
+		random:uniform(1000).
+
+	random_args() ->
+		{A1,A2,A3} = now(),
+		random:seed(A1, A2, A3),
+
+		DateTime = current_datetime(),
+		Instrument = random_instrument(),
+		Price = random_price(),
+		Amount = random_amount(),
+
+		{ Instrument, DateTime, Price, Amount }.
+</erl>

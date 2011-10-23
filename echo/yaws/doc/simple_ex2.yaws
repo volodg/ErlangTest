@@ -1,8 +1,0 @@
-
-<erl>
-	out(Arg) ->
-		io:fwrite( "nodes: ~p~n", [ nodes() ] ),
-		{ _Status, Msg } = bn_server:echo( "Sex" ),
-		{html, Msg}.
-%		{html, foobar:test(Arg)}.
-</erl>

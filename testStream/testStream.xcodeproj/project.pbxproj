@@ -1,0 +1,435 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		65E733F61454156100DF2FD1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65E733F51454156000DF2FD1 /* Foundation.framework */; };
+		65E733F91454156100DF2FD1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 65E733F81454156100DF2FD1 /* main.m */; };
+		65E733FD1454156100DF2FD1 /* testStream.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 65E733FC1454156100DF2FD1 /* testStream.1 */; };
+		65E734051454169400DF2FD1 /* StreamConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 65E734041454169400DF2FD1 /* StreamConnection.m */; };
+		65E7343814541A1D00DF2FD1 /* libJFFAsyncOperations.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 65E7341C145419EB00DF2FD1 /* libJFFAsyncOperations.a */; };
+		65E7343914541A1D00DF2FD1 /* libJFFNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 65E7340F145419E300DF2FD1 /* libJFFNetwork.a */; };
+		65E7343A14541A1D00DF2FD1 /* libJFFScheduler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 65E7343514541A1000DF2FD1 /* libJFFScheduler.a */; };
+		65E7343B14541A1D00DF2FD1 /* libJFFUtils.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 65E73426145419F400DF2FD1 /* libJFFUtils.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		65E7340E145419E300DF2FD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 65E73407145419E300DF2FD1 /* JFFNetwork.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8D5AE6DB13F3E6C600EB6143;
+			remoteInfo = JFFNetwork;
+		};
+		65E7341B145419EB00DF2FD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 65E73410145419EA00DF2FD1 /* JFFAsyncOperations.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC07E0554694100DB518D;
+			remoteInfo = JFFAsyncOperations;
+		};
+		65E73425145419F400DF2FD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 65E7341E145419F400DF2FD1 /* JFFUtils.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC07E0554694100DB518D;
+			remoteInfo = JFFUtils;
+		};
+		65E7342714541A0200DF2FD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 65E73410145419EA00DF2FD1 /* JFFAsyncOperations.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC07D0554694100DB518D;
+			remoteInfo = JFFAsyncOperations;
+		};
+		65E7342914541A0200DF2FD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 65E7341E145419F400DF2FD1 /* JFFUtils.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC07D0554694100DB518D;
+			remoteInfo = JFFUtils;
+		};
+		65E7342B14541A0200DF2FD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 65E73407145419E300DF2FD1 /* JFFNetwork.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D5AE6DA13F3E6C600EB6143;
+			remoteInfo = JFFNetwork;
+		};
+		65E7343414541A1000DF2FD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 65E7342D14541A1000DF2FD1 /* JFFScheduler.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC07E0554694100DB518D;
+			remoteInfo = JFFScheduler;
+		};
+		65E7343614541A1600DF2FD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 65E7342D14541A1000DF2FD1 /* JFFScheduler.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC07D0554694100DB518D;
+			remoteInfo = JFFScheduler;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		65E733EF1454156000DF2FD1 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				65E733FD1454156100DF2FD1 /* testStream.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		65E733F11454156000DF2FD1 /* testStream */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testStream; sourceTree = BUILT_PRODUCTS_DIR; };
+		65E733F51454156000DF2FD1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		65E733F81454156100DF2FD1 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		65E733FB1454156100DF2FD1 /* testStream-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "testStream-Prefix.pch"; sourceTree = "<group>"; };
+		65E733FC1454156100DF2FD1 /* testStream.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = testStream.1; sourceTree = "<group>"; };
+		65E734031454169400DF2FD1 /* StreamConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamConnection.h; sourceTree = "<group>"; };
+		65E734041454169400DF2FD1 /* StreamConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamConnection.m; sourceTree = "<group>"; };
+		65E73407145419E300DF2FD1 /* JFFNetwork.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JFFNetwork.xcodeproj; path = Dependencies/JFFLibrary/lib/JFFNetwork/JFFNetwork.xcodeproj; sourceTree = "<group>"; };
+		65E73410145419EA00DF2FD1 /* JFFAsyncOperations.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JFFAsyncOperations.xcodeproj; path = Dependencies/JFFLibrary/lib/JFFAsyncOperations/JFFAsyncOperations.xcodeproj; sourceTree = "<group>"; };
+		65E7341E145419F400DF2FD1 /* JFFUtils.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JFFUtils.xcodeproj; path = Dependencies/JFFLibrary/lib/JFFUtils/JFFUtils.xcodeproj; sourceTree = "<group>"; };
+		65E7342D14541A1000DF2FD1 /* JFFScheduler.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JFFScheduler.xcodeproj; path = Dependencies/JFFLibrary/lib/JFFScheduler/JFFScheduler.xcodeproj; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		65E733EE1454156000DF2FD1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				65E7343814541A1D00DF2FD1 /* libJFFAsyncOperations.a in Frameworks */,
+				65E7343914541A1D00DF2FD1 /* libJFFNetwork.a in Frameworks */,
+				65E7343A14541A1D00DF2FD1 /* libJFFScheduler.a in Frameworks */,
+				65E7343B14541A1D00DF2FD1 /* libJFFUtils.a in Frameworks */,
+				65E733F61454156100DF2FD1 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		65E733E61454155F00DF2FD1 = {
+			isa = PBXGroup;
+			children = (
+				65E733F71454156100DF2FD1 /* testStream */,
+				65E734061454190E00DF2FD1 /* Dependencies */,
+				65E733F41454156000DF2FD1 /* Frameworks */,
+				65E733F21454156000DF2FD1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		65E733F21454156000DF2FD1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				65E733F11454156000DF2FD1 /* testStream */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		65E733F41454156000DF2FD1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				65E733F51454156000DF2FD1 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		65E733F71454156100DF2FD1 /* testStream */ = {
+			isa = PBXGroup;
+			children = (
+				65E734031454169400DF2FD1 /* StreamConnection.h */,
+				65E734041454169400DF2FD1 /* StreamConnection.m */,
+				65E733F81454156100DF2FD1 /* main.m */,
+				65E733FC1454156100DF2FD1 /* testStream.1 */,
+				65E733FA1454156100DF2FD1 /* Supporting Files */,
+			);
+			path = testStream;
+			sourceTree = "<group>";
+		};
+		65E733FA1454156100DF2FD1 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				65E733FB1454156100DF2FD1 /* testStream-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		65E734061454190E00DF2FD1 /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				65E7342D14541A1000DF2FD1 /* JFFScheduler.xcodeproj */,
+				65E7341E145419F400DF2FD1 /* JFFUtils.xcodeproj */,
+				65E73410145419EA00DF2FD1 /* JFFAsyncOperations.xcodeproj */,
+				65E73407145419E300DF2FD1 /* JFFNetwork.xcodeproj */,
+			);
+			name = Dependencies;
+			sourceTree = "<group>";
+		};
+		65E73408145419E300DF2FD1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				65E7340F145419E300DF2FD1 /* libJFFNetwork.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		65E73411145419EA00DF2FD1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				65E7341C145419EB00DF2FD1 /* libJFFAsyncOperations.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		65E7341F145419F400DF2FD1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				65E73426145419F400DF2FD1 /* libJFFUtils.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		65E7342E14541A1000DF2FD1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				65E7343514541A1000DF2FD1 /* libJFFScheduler.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		65E733F01454156000DF2FD1 /* testStream */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 65E734001454156100DF2FD1 /* Build configuration list for PBXNativeTarget "testStream" */;
+			buildPhases = (
+				65E733ED1454156000DF2FD1 /* Sources */,
+				65E733EE1454156000DF2FD1 /* Frameworks */,
+				65E733EF1454156000DF2FD1 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				65E7343714541A1600DF2FD1 /* PBXTargetDependency */,
+				65E7342814541A0200DF2FD1 /* PBXTargetDependency */,
+				65E7342A14541A0200DF2FD1 /* PBXTargetDependency */,
+				65E7342C14541A0200DF2FD1 /* PBXTargetDependency */,
+			);
+			name = testStream;
+			productName = testStream;
+			productReference = 65E733F11454156000DF2FD1 /* testStream */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		65E733E81454155F00DF2FD1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 65E733EB1454155F00DF2FD1 /* Build configuration list for PBXProject "testStream" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 65E733E61454155F00DF2FD1;
+			productRefGroup = 65E733F21454156000DF2FD1 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 65E73411145419EA00DF2FD1 /* Products */;
+					ProjectRef = 65E73410145419EA00DF2FD1 /* JFFAsyncOperations.xcodeproj */;
+				},
+				{
+					ProductGroup = 65E73408145419E300DF2FD1 /* Products */;
+					ProjectRef = 65E73407145419E300DF2FD1 /* JFFNetwork.xcodeproj */;
+				},
+				{
+					ProductGroup = 65E7342E14541A1000DF2FD1 /* Products */;
+					ProjectRef = 65E7342D14541A1000DF2FD1 /* JFFScheduler.xcodeproj */;
+				},
+				{
+					ProductGroup = 65E7341F145419F400DF2FD1 /* Products */;
+					ProjectRef = 65E7341E145419F400DF2FD1 /* JFFUtils.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				65E733F01454156000DF2FD1 /* testStream */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		65E7340F145419E300DF2FD1 /* libJFFNetwork.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libJFFNetwork.a;
+			remoteRef = 65E7340E145419E300DF2FD1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		65E7341C145419EB00DF2FD1 /* libJFFAsyncOperations.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libJFFAsyncOperations.a;
+			remoteRef = 65E7341B145419EB00DF2FD1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		65E73426145419F400DF2FD1 /* libJFFUtils.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libJFFUtils.a;
+			remoteRef = 65E73425145419F400DF2FD1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		65E7343514541A1000DF2FD1 /* libJFFScheduler.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libJFFScheduler.a;
+			remoteRef = 65E7343414541A1000DF2FD1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		65E733ED1454156000DF2FD1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				65E733F91454156100DF2FD1 /* main.m in Sources */,
+				65E734051454169400DF2FD1 /* StreamConnection.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		65E7342814541A0200DF2FD1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = JFFAsyncOperations;
+			targetProxy = 65E7342714541A0200DF2FD1 /* PBXContainerItemProxy */;
+		};
+		65E7342A14541A0200DF2FD1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = JFFUtils;
+			targetProxy = 65E7342914541A0200DF2FD1 /* PBXContainerItemProxy */;
+		};
+		65E7342C14541A0200DF2FD1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = JFFNetwork;
+			targetProxy = 65E7342B14541A0200DF2FD1 /* PBXContainerItemProxy */;
+		};
+		65E7343714541A1600DF2FD1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = JFFScheduler;
+			targetProxy = 65E7343614541A1600DF2FD1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		65E733FE1454156100DF2FD1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ./Dependencies/JFFLibrary/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		65E733FF1454156100DF2FD1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ./Dependencies/JFFLibrary/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		65E734011454156100DF2FD1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "testStream/testStream-Prefix.pch";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		65E734021454156100DF2FD1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "testStream/testStream-Prefix.pch";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		65E733EB1454155F00DF2FD1 /* Build configuration list for PBXProject "testStream" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				65E733FE1454156100DF2FD1 /* Debug */,
+				65E733FF1454156100DF2FD1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		65E734001454156100DF2FD1 /* Build configuration list for PBXNativeTarget "testStream" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				65E734011454156100DF2FD1 /* Debug */,
+				65E734021454156100DF2FD1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 65E733E81454155F00DF2FD1 /* Project object */;
+}

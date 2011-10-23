@@ -1,45 +1,43 @@
 
 <erl>
+	% test in shell:
+	% 1. rm -f report.yaws*; wget -q localhost:8000/report.yaws &
+	% 2. tail -f report.yaws
 	out(Arg) ->
 		Self = self(),
 		Pid = spawn(fun() ->
 				rec_loop( Arg#arg.clisock )
 			end),
-		[{header, {content_length, -1}},
+		[ {header, {content_length, -1}},
+			{header, {"Transfer-Encoding", "chunked"} },
+			{header, {"Connection", "keep-alive"} },
 			{streamcontent_from_pid, "text/plain", Pid}].
 
 	rec_loop(Sock) ->
-		io:fwrite( "start ok receive~n" ),
 		receive
 			{discard, YawsPid} ->
 				yaws_api:stream_process_end(Sock, YawsPid);
 			{ok, YawsPid} ->
-				io:fwrite( "receive ok~n" ),
 				bn_server:push(),
 				rec_loop(Sock, YawsPid);
 			Other ->
-				io:fwrite( "receive One other: ~p~n", [ Other ] ),
 				{ html, "error" }
 		end,
 		exit(normal).
 
-	rec_loop( Sock, YawsPid ) ->
-		io:fwrite( "start srv receive~n" ),
+	rec_loop( Socket, YawsPid ) ->
 		receive
 			{ report, Report } ->
-				io:fwrite( "Receive report!!!: ~p~n", [ Report ] ),
 				SendString = io_lib:format("~s", [ Report ] ),
-				yaws_api:stream_process_deliver(Sock, SendString),
-				rec_loop( Sock, YawsPid );
+				yaws_api:stream_process_deliver_chunk(Socket, SendString),
+				rec_loop( Socket, YawsPid );
 			finish ->
-				io:fwrite( "report finished~n" ),
+				yaws_api:stream_process_deliver_final_chunk(Socket, <<>>),
 				yaws_api:stream_process_end(closed, YawsPid),
-				io:fwrite( "report finished stream_process_end~n" ),
 				exit(normal);
 			Other ->
-				io:fwrite( "receive other: ~p~n", [ Other ] ),
 				{ html, "error" }
-		after 10000000 ->
+		after 10000000 ->%TODO remove this
 			{ html, "timeout" }
 		end.
 </erl>

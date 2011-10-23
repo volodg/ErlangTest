@@ -36,6 +36,10 @@ process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } )
 
 	NewState.
 
+send_report() ->
+	io:fwrite( "TODO send report here~n" ),
+	exit( normal ).
+
 clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
 	receive
 		{ From, { Instrument, Time, Price, Amount } } ->
@@ -56,6 +60,8 @@ clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
 			end,
 
 			loop( DealerInstrument, ExpirationDatetime, NewState );
+		send_report ->
+			send_report();
 		Other ->
 			%TODO fix this
 			io:fwrite( "Unhandled msg in dealer (should not happen): ~p~n", [Other] ),
@@ -69,9 +75,7 @@ loop( DealerInstrument, ExpirationDatetime, State ) ->
 	bn_common:priority_receive( send_report, fun() ->
 		clients_loop( DealerInstrument, ExpirationDatetime, State )
 		end ),
-	%send report here
-	io:fwrite( "TODO send report here~n" ),
-	exit( normal ).
+	send_report().
 
 dealer( InstrumentName, ExpirationDatetime ) ->
 	%init here timer, state and etc

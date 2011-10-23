@@ -1,7 +1,7 @@
 -module(bn_server).
 
 %server api
--export([start/0,stop/0,init/0,loop/2,restart/0]).
+-export([start/0,stop/0,init/0,loop/3]).
 
 -include("bn_config.hrl").
 
@@ -14,11 +14,29 @@ start() ->
 	Pid = spawn( ?SRV_NAME, init, [] ),
 	register( ?SRV_NAME, Pid).
 
+startDatetime() ->
+	StartDate = date(),
+	StartTime = time(),
+	io:fwrite( "StartDate: {~p,~p}~n", [ StartDate, StartTime ] ),
+	{ date(), time() }.
+
+endDateTime( StartDateTime ) ->
+	DuratonInSeconds = ?REPORT_DURATION_SEC,
+	io:fwrite( "DuratonInSeconds: ~p~n", [DuratonInSeconds] ),
+	{EndDate, EndTime} = datetime:addSecondToDatetime( DuratonInSeconds * 10, StartDateTime ),
+	io:fwrite( "EndDate: {~p,~p}~n", [EndDate, EndTime] ),
+	{EndDate, EndTime}.
+
 init() ->
 	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
+
 	DealerPidAndExpDateByInstrument = dict:new(),
 	Instruments = sets:from_list( ?INSTRUMENTS ),
-	loop( DealerPidAndExpDateByInstrument, Instruments ).
+
+	StartDateTime = startDatetime(),
+	EndDatetime = endDateTime( StartDateTime ),
+
+	loop( DealerPidAndExpDateByInstrument, Instruments, { StartDate, EndDate, Duration } ).
 
 stop() ->
 	?SRV_NAME ! stop.
@@ -51,7 +69,7 @@ process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, From, { Inst
 	NewDealerPidAndExpDateByInstrument.
 
 %validate arguments here ( date also )
-process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, From, { Instrument, Time, Price, Amount } ) ->
+process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, DatesSettings, From, { Instrument, Time, Price, Amount } ) ->
 	NewDealerPidAndExpDateByInstrument = case sets:is_element( Instrument, Instruments ) of
 		true ->
 			process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, From, { Instrument, Time, Price, Amount } );
@@ -59,16 +77,16 @@ process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, From, { Instru
 			From ! { error, "Invalid instrument name" },
 			DealerPidAndExpDateByInstrument
 	end,
-	bn_server:loop( NewDealerPidAndExpDateByInstrument, Instruments ).
+	bn_server:loop( NewDealerPidAndExpDateByInstrument, Instruments, DatesSettings ).
 
-loop( DealerPidAndExpDateByInstrument, Instruments ) ->
+loop( DealerPidAndExpDateByInstrument, Instruments, DatesSettings ) ->
 	receive
 		{ echo, From, Msg } ->
 			From ! { reply, Msg },
 			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments );
 		stop ->
 			io:fwrite( "Exit normally~n" ),
-			true;
+			exit(normal);
 
 		%get dealer for arguments
 		{ get_dealer, From, { Instrument, Time, Price, Amount } } ->
@@ -78,19 +96,19 @@ loop( DealerPidAndExpDateByInstrument, Instruments ) ->
 		{ push_subscribe, From } ->
 			io:fwrite( "srv: push_subscribed~n" ),
 			run_report_timer( From, 5 ),
-			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments );
+			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments, DatesSettings );
 		{ push_notification, From, 0 } ->
 			io:fwrite( "srv: push_notification: ~p~n", [0] ),
 			send_report( From, 0 ),
 			From ! finish,
-			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments );
+			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments, DatesSettings );
 		{ push_notification, From, Num } ->
 			io:fwrite( "srv: push_notification: ~p~n", [Num] ),
 			send_report( From, Num ),
 			run_report_timer( From, Num - 1 ),
-			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments );
+			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments, DatesSettings );
 
 		Other ->
 			io:fwrite( "Unhandled server msg~p~n", [Other] ),
-			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments )
+			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments, DatesSettings )
 	end.

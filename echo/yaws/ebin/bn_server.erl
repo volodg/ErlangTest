@@ -1,7 +1,7 @@
 -module(bn_server).
 
 %server api
--export([start/0,stop/0,loop/1]).
+-export([start/0,stop/0,init/0,loop/1]).
 
 -include("bn_config.hrl").
 
@@ -11,7 +11,7 @@
 
 start() ->
 	io:fwrite( "Start server: ~p~n", [ ?SRV_NAME ]  ),
-	Pid = spawn( ?SRV_NAME, loop, [ dict:new() ] ),
+	Pid = spawn( ?SRV_NAME, init, [] ),
 	register( ?SRV_NAME, Pid).
 
 stop() ->
@@ -25,40 +25,43 @@ send_report( To, Num ) ->
 	Str = integer_to_list(Num),
 	To ! { report, Str }.
 
-loop(State) ->
+init() ->
+	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
+	DealerPidAndExpDateByInstrument = dict:new(),
+	loop(DealerPidAndExpDateByInstrument).
+
+loop( DealerPidAndExpDateByInstrument ) ->
 	receive
 		{ echo, From, Msg } ->
 			From ! { reply, Msg },
-			bn_server:loop( State );
+			bn_server:loop( DealerPidAndExpDateByInstrument );
 		stop ->
 			io:fwrite( "Exit normally~n" ),
 			true;
 
 		%get dealer for arguments
 		{ get_dealer, From, { _Instrument, _Time, _Price, _Amount } } ->
-			%TODO validate arguments
-			%TODO separate dealer for separate instrument
-			%TODO pass to daler his timeout
 			DealerPid = spawn( bn_dealer, dealer, [] ),
-			From ! { dealer_pid, DealerPid };
+			From ! { dealer_pid, DealerPid },
+			bn_server:loop( DealerPidAndExpDateByInstrument );
 
-		% push notifications
+		% test push notifications
 		{ push_subscribe, From } ->
 			io:fwrite( "srv: push_subscribed~n" ),
 			run_report_timer( From, 5 ),
-			bn_server:loop( State );
+			bn_server:loop( DealerPidAndExpDateByInstrument );
 		{ push_notification, From, 0 } ->
 			io:fwrite( "srv: push_notification: ~p~n", [0] ),
 			send_report( From, 0 ),
 			From ! finish,
-			bn_server:loop( State );
+			bn_server:loop( DealerPidAndExpDateByInstrument );
 		{ push_notification, From, Num } ->
 			io:fwrite( "srv: push_notification: ~p~n", [Num] ),
 			send_report( From, Num ),
 			run_report_timer( From, Num - 1 ),
-			bn_server:loop( State );
+			bn_server:loop( DealerPidAndExpDateByInstrument );
 
 		Other ->
 			io:fwrite( "Unhandled server msg~p~n", [Other] ),
-			bn_server:loop( State )
+			bn_server:loop( DealerPidAndExpDateByInstrument )
 	end.

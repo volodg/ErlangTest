@@ -1,7 +1,11 @@
 
 <erl>
+	% test in shell:
+	% 1. rm -f echo.yaws*; wget -q localhost:8000/echo.yaws?echo=testMsg &
+	% 2. head echo.yaws\?echo\=testMsg
 	out(Arg) ->
-		Resp = bn_server:echo( "Echo test" ) ,
+		{ ok, Msg } = queryvar(Arg, echo),
+		Resp = bn_client:echo( Msg ) ,
 		ToReturn = case Resp of
 			{ ok, RespMsg } -> RespMsg;
 			{ error, ErrorDesc } -> "Server Error";

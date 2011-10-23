@@ -26,6 +26,8 @@ millisecondsToDate(Milliseconds) ->
 1. Implement dates,
 1.1 separate dealers by dates.
 
+1.1.1. Rename all functions from adsDSF to asd_sad
+
 1.1 valiadte date
 2. Recriate dealer when expired
 3. Dealer has timeout end exit normal when it is

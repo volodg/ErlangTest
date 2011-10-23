@@ -25,7 +25,7 @@ endDateTime( StartDateTime ) ->
 	io:fwrite( "DuratonInSeconds: ~p~n", [DuratonInSeconds] ),
 	{EndDate, EndTime} = datetime:addSecondToDatetime( DuratonInSeconds * 10, StartDateTime ),
 	io:fwrite( "EndDate: {~p,~p}~n", [EndDate, EndTime] ),
-	{EndDate, EndTime}.
+	{ {EndDate, EndTime}, DuratonInSeconds }.
 
 init() ->
 	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
@@ -34,9 +34,9 @@ init() ->
 	Instruments = sets:from_list( ?INSTRUMENTS ),
 
 	StartDateTime = startDatetime(),
-	EndDatetime = endDateTime( StartDateTime ),
+	{ EndDatetime, Duration } = endDateTime( StartDateTime ),
 
-	loop( DealerPidAndExpDateByInstrument, Instruments, { StartDate, EndDate, Duration } ).
+	loop( DealerPidAndExpDateByInstrument, Instruments, { StartDateTime, EndDatetime, Duration } ).
 
 stop() ->
 	?SRV_NAME ! stop.
@@ -68,12 +68,27 @@ process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, From, { Inst
 	From ! { dealer_pid, InstrumentDealerPid },
 	NewDealerPidAndExpDateByInstrument.
 
-%validate arguments here ( date also )
+%validate arguments here
 process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, DatesSettings, From, { Instrument, Time, Price, Amount } ) ->
-	NewDealerPidAndExpDateByInstrument = case sets:is_element( Instrument, Instruments ) of
-		true ->
-			process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, From, { Instrument, Time, Price, Amount } );
-		false ->
+	{ StartDatetime, EndDatetime, Duration } = DatesSettings,
+
+	ValidDatetime   = datetime:valid_datetime( Time ),
+	ValidInstrument = sets:is_element( Instrument, Instruments ),
+
+	NewDealerPidAndExpDateByInstrument = case { ValidDatetime, ValidInstrument } of
+		{ true, true } ->
+			ValidDealDateRange = datetime:validDateTimeWithDateRangeAndDuration( Time, StartDatetime, EndDatetime, Duration ),
+			case ValidDealDateRange of
+				true ->
+					process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, From, { Instrument, Time, Price, Amount } );
+				false ->
+					From ! { error, "Invalid date: out of range deal dates" },
+					DealerPidAndExpDateByInstrument
+			end;
+		{ false, _ } ->
+			From ! { error, "Invalid date format" },
+			DealerPidAndExpDateByInstrument;
+		{ _, false } ->
 			From ! { error, "Invalid instrument name" },
 			DealerPidAndExpDateByInstrument
 	end,
@@ -90,7 +105,7 @@ loop( DealerPidAndExpDateByInstrument, Instruments, DatesSettings ) ->
 
 		%get dealer for arguments
 		{ get_dealer, From, { Instrument, Time, Price, Amount } } ->
-			process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, From, { Instrument, Time, Price, Amount } );
+			process_get_dealer( DealerPidAndExpDateByInstrument, Instruments, DatesSettings, From, { Instrument, Time, Price, Amount } );
 
 		% test push notifications
 		{ push_subscribe, From } ->

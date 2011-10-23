@@ -54,17 +54,26 @@ send_report( To, Num ) ->
 	Str = integer_to_list(Num),
 	To ! { report, Str }.
 
+run_new_dealer_for_instrument( Instrument, DatesSettings, DealerPidAndExpDateByInstrument ) ->
+	ExpirationDatetime = datetime:nearestExpirationDatetime( DatesSettings ),
+	DealerPid = spawn( bn_dealer, dealer, [Instrument, ExpirationDatetime] ),
+	NewState = dict:store( Instrument, { DealerPid, ExpirationDatetime }, DealerPidAndExpDateByInstrument ),
+	{ NewState, DealerPid }.
+
 %validate arguments before calling this method
 process_get_dealer_for_instrument( DealerPidAndExpDateByInstrument, DatesSettings, From, { Instrument, _Time, _Price, _Amount } ) ->
 	{ NewDealerPidAndExpDateByInstrument, InstrumentDealerPid } = case dict:find( Instrument, DealerPidAndExpDateByInstrument ) of
-		{ ok, { DealerPid, _ExpirationDate } } ->
-		    %TODO check _ExpirationDate
-			{ DealerPidAndExpDateByInstrument, DealerPid };
+		{ ok, { DealerPid, ExpirationDate } } ->
+			NearestNextStartDate = datetime:nearestExpirationDatetime( DatesSettings ),
+			ExpirationDateExpared = datetime:datetimeEarlierThanDatetime( ExpirationDate, NearestNextStartDate ),
+		    case ExpirationDateExpared of
+				true ->
+					run_new_dealer_for_instrument( Instrument, DatesSettings, DealerPidAndExpDateByInstrument );
+				false ->
+					{ DealerPidAndExpDateByInstrument, DealerPid }
+			end;
 		error ->
-			ExpirationDatetime = datetime:nearestExpirationDatetime( DatesSettings ),
-			DealerPid = spawn( bn_dealer, dealer, [Instrument, ExpirationDatetime] ),
-			NewState = dict:store( Instrument, { DealerPid, ExpirationDatetime }, DealerPidAndExpDateByInstrument ),
-			{ NewState, DealerPid }
+			run_new_dealer_for_instrument( Instrument, DatesSettings, DealerPidAndExpDateByInstrument )
 	end,
 	From ! { dealer_pid, InstrumentDealerPid },
 	NewDealerPidAndExpDateByInstrument.

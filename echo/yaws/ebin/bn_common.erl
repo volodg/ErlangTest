@@ -22,8 +22,7 @@ valid_deal_datetime( Datetime, DatesSettings ) ->
 	ValidDatetime = datetime:valid_datetime( Datetime ),
 	case ValidDatetime of
 		true ->
-			{ StartDatetime, EndDatetime, Duration } = DatesSettings,
-			ValidDealDateRange = datetime:validDateTimeWithDateRangeAndDuration( Datetime, StartDatetime, EndDatetime, Duration ),
+			ValidDealDateRange = datetime:validDateTimeWithDateRangeAndDuration( Datetime, DatesSettings ),
 			case ValidDealDateRange of
 				true ->
 					true;

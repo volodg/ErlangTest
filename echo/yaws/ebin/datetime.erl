@@ -1,7 +1,7 @@
 -module(datetime).
 
 -export([addSecondToDatetime/2,datetimeWithinDatetimes/3,datetimeEarlierThanDatetime/2
-,nearestDatetimeLessThanNow/2,validDateTimeWithDateRangeAndDuration/4
+,nearestDatetimeLessThanNow/2,validDateTimeWithDateRangeAndDuration/2
 ,valid_datetime/1,nearestExpirationDatetime/1]).
 
 addSecondToDatetime(Seconds, Datetime) ->
@@ -44,7 +44,8 @@ nearestExpirationDatetime( DatesSettings ) ->
 	CurrentStartTime = nearestDatetimeLessThanNow( StartDatetime, Duration ),
 	addSecondToDatetime( Duration, CurrentStartTime ).
 
-validDateTimeWithDateRangeAndDuration( Datetime, StartDatetime, EndDatetime, Duration ) ->
+validDateTimeWithDateRangeAndDuration( Datetime, DatesSettings ) ->
+	{ StartDatetime, EndDatetime, Duration } = DatesSettings,
 	NowDatetime = { date(), time() },
 	ValidNowDatetime = datetimeWithinDatetimes( NowDatetime, StartDatetime, EndDatetime ),
 	CurrentStartTime = nearestDatetimeLessThanNow( StartDatetime, Duration ),

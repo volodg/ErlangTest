@@ -23,12 +23,15 @@ startDatetime() ->
 endDateTime( StartDateTime ) ->
 	DuratonInSeconds = ?REPORT_DURATION_SEC,
 	io:fwrite( "DuratonInSeconds: ~p~n", [DuratonInSeconds] ),
-	{EndDate, EndTime} = datetime:addSecondToDatetime( DuratonInSeconds * 10, StartDateTime ),
+	%TODO change 10000
+	{EndDate, EndTime} = datetime:addSecondToDatetime( DuratonInSeconds * 10000, StartDateTime ),
 	io:fwrite( "EndDate: {~p,~p}~n", [EndDate, EndTime] ),
 	{ {EndDate, EndTime}, DuratonInSeconds }.
 
 init() ->
 	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
+
+	bn_report:start_link(),
 
 	DealerPidAndExpDateByInstrument = dict:new(),
 	Instruments = sets:from_list( ?INSTRUMENTS ),
@@ -94,7 +97,7 @@ loop( DealerPidAndExpDateByInstrument, Instruments, DatesSettings ) ->
 	receive
 		{ echo, From, Msg } ->
 			From ! { reply, Msg },
-			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments );
+			bn_server:loop( DealerPidAndExpDateByInstrument, Instruments, DatesSettings );
 		stop ->
 			io:fwrite( "Exit normally~n" ),
 			exit(normal);

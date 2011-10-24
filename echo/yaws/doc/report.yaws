@@ -1,8 +1,8 @@
 
 <erl>
 	% test in shell:
-	% 1. rm -f report.yaws*; wget -q localhost:8000/report.yaws &
-	% 2. tail -f report.yaws
+	% 1. touch report.yaws*; wget -q -a=report.yaws localhost:8000/report.yaws &
+	% 2. tail -f report.yaws.1
 	out(Arg) ->
 		Self = self(),
 		Pid = spawn(fun() ->
@@ -18,7 +18,7 @@
 			{discard, YawsPid} ->
 				yaws_api:stream_process_end(Sock, YawsPid);
 			{ok, YawsPid} ->
-				bn_client:subscribe(),
+				bn_report:subscribe( self() ),
 				rec_loop(Sock, YawsPid);
 			Other ->
 				{ html, "error" }
@@ -27,8 +27,10 @@
 
 	rec_loop( Socket, YawsPid ) ->
 		receive
-			{ report, Report } ->
-				SendString = io_lib:format("~s", [ Report ] ),
+			{ report, DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } ->
+				ReportFormat = "Instr: ~p OpenDatetime: ~p OpenPrice: ~p ClosePrice: ~p MinPrice: ~p MaxPrice: ~p TotalAmount: ~p~n",
+				SendString = io_lib:format( ReportFormat,
+					[ DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount ] ),
 				yaws_api:stream_process_deliver_chunk(Socket, SendString),
 				rec_loop( Socket, YawsPid );
 			finish ->

@@ -35,3 +35,5 @@ millisecondsToDate(Milliseconds) ->
 5. remove Pid when exit or crash from DealerPidAndExpDateByInstrument
 
 6. Send empty reports also ?!
+
+7. Rewrite server using gen_server behaviour !!!

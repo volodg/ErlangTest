@@ -26,6 +26,17 @@
 start_link() ->
 	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
+%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+%%--------------------------------------------------------------------
+handle_call(_Request, _From, State) ->
+	{noreply, State}.
+
 %%--------------------------------------------------------------------
 %% Function: create_account(Name) -> ok
 %% Description: Creates a bank account for the person with name Name
@@ -60,15 +71,15 @@ init([]) ->
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
 handle_cast( { notify_all, Msg }, State ) ->
-	foreach(fun(H) -> H ! Msg end, State),
+	lists:foreach(fun(H) -> H ! Msg end, State),
 	{noreply, State};
 
 handle_cast({subscribe, Pid}, State) ->
-	NewState = append(State, [Pid]),
+	NewState = lists:append(State, [Pid]),
 	{noreply, NewState};
 
 handle_cast({unsubscribe, Pid}, State) ->
-	NewState = delete(Pid, State),
+	NewState = lists:delete(Pid, State),
 	{noreply, NewState}.
 
 %%--------------------------------------------------------------------

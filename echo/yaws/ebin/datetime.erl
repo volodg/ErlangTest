@@ -38,6 +38,7 @@ datetime_difference_in_seconds( FromDatetime, ToDatetime ) ->
 	ToDatetimeSeconds = calendar:datetime_to_gregorian_seconds( ToDatetime ),
 	ToDatetimeSeconds - FromDatetimeSeconds.
 
+%TODO remove recursion
 nearestDatetimeLessThanNow( StartDateTime, Duration ) ->
 	NowDateTime = { date(), time() },
 	NextCurrentDateTime = addSecondToDatetime( Duration, StartDateTime ),

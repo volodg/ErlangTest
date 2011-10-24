@@ -22,7 +22,17 @@
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start() ->
-	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+	case gen_server:start_link({local, ?SERVER}, ?MODULE, [], []) of
+		{ok,_Pid} ->
+			true;
+		ignore ->
+			true;
+		{error,{already_started,Pid}} ->
+			exit(Pid, kill),
+			start();
+		{error,_Error} ->
+			false
+	end.
 
 %%--------------------------------------------------------------------
 %% Function: notify(Msg) -> ok
@@ -57,10 +67,12 @@ deal( Deal ) ->
 init([]) ->
 	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
 
+	bn_report:start_link(),
+
 	State = dict:store( dealer_info_by_instrument, dict:new(), dict:new() ),
 
-	StartDateTime = startDatetime(),
-	{ EndDatetime, Duration } = endDateTime( StartDateTime ),
+	StartDateTime = start_datetime(),
+	{ EndDatetime, Duration } = end_datetime( StartDateTime ),
 	NewState = dict:store( dete_settings, { StartDateTime, EndDatetime, Duration }, State ),
 
 	{ ok, NewState }.
@@ -117,17 +129,17 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%--------------------------------------------------------------------
 
-startDatetime() ->
+start_datetime() ->
 	StartDate = date(),
 	StartTime = time(),
 	io:fwrite( "StartDate: {~p,~p}~n", [ StartDate, StartTime ] ),
 	{ date(), time() }.
 
-endDateTime( StartDateTime ) ->
+end_datetime( StartDateTime ) ->
 	DuratonInSeconds = ?REPORT_DURATION_SEC,
 	io:fwrite( "DuratonInSeconds: ~p~n", [DuratonInSeconds] ),
 	%TODO change 10000
-	{EndDate, EndTime} = datetime:addSecondToDatetime( DuratonInSeconds * 10000, StartDateTime ),
+	{EndDate, EndTime} = datetime:add_second_to_datetime( DuratonInSeconds * 10000, StartDateTime ),
 	io:fwrite( "EndDate: {~p,~p}~n", [EndDate, EndTime] ),
 	{ {EndDate, EndTime}, DuratonInSeconds }.
 
@@ -136,7 +148,7 @@ get_dates_settings( State ) ->
 	DateSettings.
 
 run_new_dealer_for_instrument( State, Instrument ) ->
-	ExpirationDatetime = datetime:nearestExpirationDatetime( get_dates_settings( State ) ),
+	ExpirationDatetime = datetime:nearest_expiration_datetime( get_dates_settings( State ) ),
 	DealerPid = spawn( bn_dealer, dealer, [Instrument, ExpirationDatetime] ),
 	NewState = set_dealer_info( State, Instrument, { DealerPid, ExpirationDatetime } ),
 	{ NewState, DealerPid }.
@@ -145,8 +157,8 @@ run_new_dealer_for_instrument( State, Instrument ) ->
 process_get_dealer_for_instrument( State, { Instrument, _Time, _Price, _Amount } ) ->
 	{ NewState, InstrumentDealerPid } = case find_dealer_info( State, Instrument ) of
 		{ ok, { DealerPid, ExpirationDate } } ->
-			NearestNextStartDate = datetime:nearestExpirationDatetime( get_dates_settings( State ) ),
-			ExpirationDateExpared = datetime:datetimeEarlierThanDatetime( ExpirationDate, NearestNextStartDate ),
+			NearestNextStartDate = datetime:nearest_expiration_datetime( get_dates_settings( State ) ),
+			ExpirationDateExpared = datetime:datetime_earlier_than_datetime( ExpirationDate, NearestNextStartDate ),
 		    case ExpirationDateExpared of
 				true ->
 					run_new_dealer_for_instrument( State, Instrument );

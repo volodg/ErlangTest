@@ -13,7 +13,7 @@
 
 	%no strong arguments validation
 	current_datetime() ->
-		%datetime:addSecondToDatetime( 60, { date(), time() } ).
+		%datetime:add_second_to_datetime( 60, { date(), time() } ).
 		{ date(), time() }.
 
 	random_instrument() ->

@@ -37,6 +37,7 @@ process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } )
 	NewState.
 
 send_report( DealerInstrument, State ) ->
+	%TODO dont send empty report
 	{ OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } = State,
 	bn_report:notify( { report, DealerInstrument, OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } ),
 	exit( normal ).
@@ -45,7 +46,7 @@ clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
 	receive
 		{ From, Deal } ->
 			DurationInSeconds = ?REPORT_DURATION_SEC,
-			StartDatetime = datetime:addSecondToDatetime( -DurationInSeconds, ExpirationDatetime ),
+			StartDatetime = datetime:add_second_to_datetime( -DurationInSeconds, ExpirationDatetime ),
 			DatesSettings = { StartDatetime, ExpirationDatetime, DurationInSeconds },
 
 			ValidDealArgs = bn_common:validate_deal_args( [ DealerInstrument ], DatesSettings, Deal ),
@@ -90,6 +91,6 @@ dealer( InstrumentName, ExpirationDatetime ) ->
 	ClosePrice = 0,
 	MinPrice = 0,
 	MaxPrice = 0,
-	%TODO open_time_todo
-	InitState = { open_time_todo, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
+	OpenDateTime = datetime:add_second_to_datetime( -?REPORT_DURATION_SEC, ExpirationDatetime ),
+	InitState = { OpenDateTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
 	loop( InstrumentName, ExpirationDatetime, InitState ).

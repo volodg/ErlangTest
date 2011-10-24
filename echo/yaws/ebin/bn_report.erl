@@ -62,7 +62,8 @@ unsubscribe(Pid) ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init([]) ->
-  {ok, []}.
+	%TODO send live packages
+	{ok, []}.
 
 %%--------------------------------------------------------------------
 %% Function: handle_cast(Msg, State) -> {noreply, State} |
@@ -71,6 +72,7 @@ init([]) ->
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
 handle_cast( { notify_all, Msg }, State ) ->
+	io:fwrite( "notify_all with report: ~p~n", [ State ] ),
 	lists:foreach(fun(H) -> H ! Msg end, State),
 	{noreply, State};
 
@@ -98,8 +100,9 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 %%--------------------------------------------------------------------
-terminate(_Reason, _State) ->
-  ok.
+terminate(_Reason, State) ->
+	lists:foreach(fun(H) -> H ! finish end, State),
+	ok.
 
 %%--------------------------------------------------------------------
 %% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}

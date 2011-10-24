@@ -28,9 +28,10 @@
 	rec_loop( Socket, YawsPid ) ->
 		receive
 			{ report, DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } ->
-				ReportFormat = "Instr: ~p OpenDatetime: ~p OpenPrice: ~p ClosePrice: ~p MinPrice: ~p MaxPrice: ~p TotalAmount: ~p~n",
+				{ Date, Time } = OpenDatetime,
+				ReportFormat = "Instr: ~p OpenDatetime: {~p,~p} OpenPrice: ~p ClosePrice: ~p MinPrice: ~p MaxPrice: ~p TotalAmount: ~p~n",
 				SendString = io_lib:format( ReportFormat,
-					[ DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount ] ),
+					[ DealerInstrument, Date, Time, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount ] ),
 				yaws_api:stream_process_deliver_chunk(Socket, SendString),
 				rec_loop( Socket, YawsPid );
 			finish ->
@@ -39,7 +40,5 @@
 				exit(normal);
 			Other ->
 				{ html, "error" }
-		after 10000000 ->%TODO remove this
-			{ html, "timeout" }
 		end.
 </erl>

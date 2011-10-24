@@ -36,7 +36,7 @@ valid_deal_datetime( Datetime, DatesSettings ) ->
 %returns true or { false, ValidateErrorDescription }
 validate_deal_args( Instruments, DatesSettings, Instrument, Time, Price, Amount ) ->
 	ValidDatetime   = valid_deal_datetime( Time, DatesSettings ),
-	ValidInstrument = sets:is_element( Instrument, Instruments ),
+	ValidInstrument = sets:is_element( Instrument, sets:from_list( Instruments ) ),
 	ValidPrice      = valid_price( Price ),
 	ValidAmount     = valid_amount( Amount ),
 

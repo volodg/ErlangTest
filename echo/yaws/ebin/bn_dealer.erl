@@ -44,13 +44,11 @@ send_report( DealerInstrument, State ) ->
 clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
 	receive
 		{ From, { Instrument, Time, Price, Amount } } ->
-			Instruments = sets:from_list( [ DealerInstrument ] ),
-
 			DurationInSeconds = ?REPORT_DURATION_SEC,
 			StartDatetime = datetime:addSecondToDatetime( -DurationInSeconds, ExpirationDatetime ),
 			DatesSettings = { StartDatetime, ExpirationDatetime, DurationInSeconds },
 
-			ValidDealArgs = bn_common:validate_deal_args( Instruments, DatesSettings, Instrument, Time, Price, Amount ),
+			ValidDealArgs = bn_common:validate_deal_args( [ DealerInstrument ], DatesSettings, Instrument, Time, Price, Amount ),
 
 			NewState = case ValidDealArgs of
 				true ->

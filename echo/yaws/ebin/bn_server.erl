@@ -1,7 +1,7 @@
 -module(bn_server).
 
 %server api
--export([start/0,stop/0,init/0,loop/3]).
+-export([start/0,stop/0,init/0,loop/2]).
 
 -include("bn_config.hrl").
 
@@ -35,12 +35,10 @@ init() ->
 
 	State = dict:store( dealer_info_by_instrument, dict:new(), dict:new() ),
 
-	Instruments = sets:from_list( ?INSTRUMENTS ),
-
 	StartDateTime = startDatetime(),
 	{ EndDatetime, Duration } = endDateTime( StartDateTime ),
 
-	loop( State, Instruments, { StartDateTime, EndDatetime, Duration } ).
+	loop( State, { StartDateTime, EndDatetime, Duration } ).
 
 stop() ->
 	?SRV_NAME ! stop.
@@ -82,8 +80,8 @@ process_get_dealer_for_instrument( State, DatesSettings, From, { Instrument, _Ti
 	From ! { dealer_pid, InstrumentDealerPid },
 	NewState.
 
-process_get_dealer( State, Instruments, DatesSettings, From, { Instrument, Time, Price, Amount } ) ->
-	ValidDealArgs = bn_common:validate_deal_args( Instruments, DatesSettings, Instrument, Time, Price, Amount ),
+process_get_dealer( State, DatesSettings, From, { Instrument, Time, Price, Amount } ) ->
+	ValidDealArgs = bn_common:validate_deal_args( ?INSTRUMENTS, DatesSettings, Instrument, Time, Price, Amount ),
 
 	NewState = case ValidDealArgs of
 		true ->
@@ -92,7 +90,7 @@ process_get_dealer( State, Instruments, DatesSettings, From, { Instrument, Time,
 			From ! { error, ValidationErrorDescr },
 			State
 	end,
-	bn_server:loop( NewState, Instruments, DatesSettings ).
+	bn_server:loop( NewState, DatesSettings ).
 
 %returns { ok, { DealerPid, ExpirationDate } } or error
 find_dealer_info( State, Instrument ) ->
@@ -106,36 +104,36 @@ set_dealer_info( State, Instrument, DealerInfo ) ->
 	NewDealerPidAndExpDateByInstrument = dict:store( Instrument, DealerInfo, DealerPidAndExpDateByInstrument ),
 	dict:store( dealer_info_by_instrument, NewDealerPidAndExpDateByInstrument, State ).
 
-loop( State, Instruments, DatesSettings ) ->
+loop( State, DatesSettings ) ->
 	receive
 		{ echo, From, Msg } ->
 			From ! { reply, Msg },
-			bn_server:loop( State, Instruments, DatesSettings );
+			bn_server:loop( State, DatesSettings );
 		stop ->
 			io:fwrite( "Exit normally~n" ),
 			exit(normal);
 
 		%get dealer for arguments
 		{ get_dealer, From, { Instrument, Time, Price, Amount } } ->
-			process_get_dealer( State, Instruments, DatesSettings, From, { Instrument, Time, Price, Amount } );
+			process_get_dealer( State, DatesSettings, From, { Instrument, Time, Price, Amount } );
 
 		% test push notifications
 		{ push_subscribe, From } ->
 			io:fwrite( "srv: push_subscribed~n" ),
 			run_report_timer( From, 5 ),
-			bn_server:loop( State, Instruments, DatesSettings );
+			bn_server:loop( State, DatesSettings );
 		{ push_notification, From, 0 } ->
 			io:fwrite( "srv: push_notification: ~p~n", [0] ),
 			send_report( From, 0 ),
 			From ! finish,
-			bn_server:loop( State, Instruments, DatesSettings );
+			bn_server:loop( State, DatesSettings );
 		{ push_notification, From, Num } ->
 			io:fwrite( "srv: push_notification: ~p~n", [Num] ),
 			send_report( From, Num ),
 			run_report_timer( From, Num - 1 ),
-			bn_server:loop( State, Instruments, DatesSettings );
+			bn_server:loop( State, DatesSettings );
 
 		Other ->
 			io:fwrite( "Unhandled server msg~p~n", [Other] ),
-			bn_server:loop( State, Instruments, DatesSettings )
+			bn_server:loop( State, DatesSettings )
 	end.

@@ -37,9 +37,11 @@ process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } )
 	NewState.
 
 send_report( DealerInstrument, State ) ->
-	%TODO dont send empty report
 	{ OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } = State,
-	bn_report:notify( { report, DealerInstrument, OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } ),
+	case TotalAmount of
+		TotalAmount when TotalAmount > 0 ->
+			bn_report:notify( { report, DealerInstrument, OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } )
+	end,
 	exit( normal ).
 
 clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
@@ -63,7 +65,6 @@ clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
 		send_report ->
 			send_report( DealerInstrument, State );
 		Other ->
-			%TODO fix this if happen
 			io:fwrite( "Unhandled msg in dealer (should not happen): ~p~n", [Other] ),
 			loop( DealerInstrument, ExpirationDatetime, State )
 	end.

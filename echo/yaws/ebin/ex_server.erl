@@ -30,7 +30,7 @@ start_link() ->
 	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %%--------------------------------------------------------------------
-%% Function: create_account(Name) -> ok
+%% Function: echo_test(Name) -> ok
 %% Description: Creates a bank account for the person with name Name
 %%--------------------------------------------------------------------
 echo_test(Msg) ->

@@ -1,18 +1,121 @@
 -module(bn_server).
 
-%server api
--export([start/0,stop/0,init/0,loop/2]).
+-behaviour(gen_server).
+
+%% API
+-export([start/0,
+        deal/1]).
+
+%% gen_server callbacks
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2,
+         terminate/2, code_change/3]).
 
 -include("bn_config.hrl").
 
+-define(SERVER, ?MODULE).
+
 %%====================================================================
-%% SERVER
+%% API
+%%====================================================================
+%%--------------------------------------------------------------------
+%% Function: start() -> {ok,Pid} | ignore | {error,Error}
+%% Description: Starts the server
+%%--------------------------------------------------------------------
+start() ->
+	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
+%%--------------------------------------------------------------------
+%% Function: notify(Msg) -> ok
+%% Description: Creates a bank account for the person with name Name
+%%--------------------------------------------------------------------
+deal( Deal ) ->
+	DealerPid = gen_server:call( { ?SERVER, ?SRV_NODE }, {get_dealer, Deal}),
+	DealerPid ! { self(), Deal },
+	%TODO change this
+	receive
+		{ reply, Response } ->
+			{ ok, Response };
+		{ error, ErrorDescr } ->
+			{ error, ErrorDescr };
+		timeout ->%TODO remove???
+			timeout
+	after 500 ->
+		timeout
+	end.
+
+%%====================================================================
+%% gen_server callbacks
 %%====================================================================
 
-start() ->
-	io:fwrite( "Start server: ~p~n", [ ?SRV_NAME ]  ),
-	Pid = spawn( ?SRV_NAME, init, [] ),
-	register( ?SRV_NAME, Pid).
+%%--------------------------------------------------------------------
+%% Function: init(Args) -> {ok, State} |
+%%                         {ok, State, Timeout} |
+%%                         ignore               |
+%%                         {stop, Reason}
+%% Description: Initiates the server
+%%--------------------------------------------------------------------
+init([]) ->
+	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
+
+	State = dict:store( dealer_info_by_instrument, dict:new(), dict:new() ),
+
+	StartDateTime = startDatetime(),
+	{ EndDatetime, Duration } = endDateTime( StartDateTime ),
+	NewState = dict:store( dete_settings, { StartDateTime, EndDatetime, Duration }, State ),
+
+	{ ok, NewState }.
+
+%%--------------------------------------------------------------------
+%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+%%--------------------------------------------------------------------
+handle_call({get_dealer, Deal}, _From, State) ->
+	process_get_dealer( State, Deal ).
+	%{reply, Reply, State}.
+
+%%--------------------------------------------------------------------
+%% Function: handle_cast(Msg, State) -> {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, State}
+%% Description: Handling cast messages
+%%--------------------------------------------------------------------
+handle_cast(_Msg, State) ->
+	{noreply, State}.
+
+%%--------------------------------------------------------------------
+%% Function: handle_info(Info, State) -> {noreply, State} |
+%%                                       {noreply, State, Timeout} |
+%%                                       {stop, Reason, State}
+%% Description: Handling all non call/cast messages
+%%--------------------------------------------------------------------
+handle_info(_Info, State) ->
+	{noreply, State}.
+
+%%--------------------------------------------------------------------
+%% Function: terminate(Reason, State) -> void()
+%% Description: This function is called by a gen_server when it is about to
+%% terminate. It should be the opposite of Module:init/1 and do any necessary
+%% cleaning up. When it returns, the gen_server terminates with Reason.
+%% The return value is ignored.
+%%--------------------------------------------------------------------
+terminate(_Reason, _State) ->
+	ok.
+
+%%--------------------------------------------------------------------
+%% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% Description: Convert process state when code is changed
+%%--------------------------------------------------------------------
+code_change(_OldVsn, State, _Extra) ->
+	{ok, State}.
+
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
 
 startDatetime() ->
 	StartDate = date(),
@@ -28,69 +131,42 @@ endDateTime( StartDateTime ) ->
 	io:fwrite( "EndDate: {~p,~p}~n", [EndDate, EndTime] ),
 	{ {EndDate, EndTime}, DuratonInSeconds }.
 
-init() ->
-	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
+get_dates_settings( State ) ->
+	{ ok, DateSettings } = dict:find( dete_settings, State ),
+	DateSettings.
 
-	bn_report:start_link(),
-
-	State = dict:store( dealer_info_by_instrument, dict:new(), dict:new() ),
-
-	StartDateTime = startDatetime(),
-	{ EndDatetime, Duration } = endDateTime( StartDateTime ),
-
-	loop( State, { StartDateTime, EndDatetime, Duration } ).
-
-stop() ->
-	?SRV_NAME ! stop.
-
-%restart() ->
-%	stop(),
-%	receive stoped
-%	start().
-
-run_report_timer( From, Num ) ->
-	Delay = 2000,
-	timer:send_after( Delay, { push_notification, From, Num } ).
-
-send_report( To, Num ) ->
-	Str = integer_to_list(Num),
-	To ! { report, Str }.
-
-run_new_dealer_for_instrument( State, Instrument, DatesSettings ) ->
-	ExpirationDatetime = datetime:nearestExpirationDatetime( DatesSettings ),
+run_new_dealer_for_instrument( State, Instrument ) ->
+	ExpirationDatetime = datetime:nearestExpirationDatetime( get_dates_settings( State ) ),
 	DealerPid = spawn( bn_dealer, dealer, [Instrument, ExpirationDatetime] ),
 	NewState = set_dealer_info( State, Instrument, { DealerPid, ExpirationDatetime } ),
 	{ NewState, DealerPid }.
 
 %validate arguments before calling this method
-process_get_dealer_for_instrument( State, DatesSettings, From, { Instrument, _Time, _Price, _Amount } ) ->
+process_get_dealer_for_instrument( State, { Instrument, _Time, _Price, _Amount } ) ->
 	{ NewState, InstrumentDealerPid } = case find_dealer_info( State, Instrument ) of
 		{ ok, { DealerPid, ExpirationDate } } ->
-			NearestNextStartDate = datetime:nearestExpirationDatetime( DatesSettings ),
+			NearestNextStartDate = datetime:nearestExpirationDatetime( get_dates_settings( State ) ),
 			ExpirationDateExpared = datetime:datetimeEarlierThanDatetime( ExpirationDate, NearestNextStartDate ),
 		    case ExpirationDateExpared of
 				true ->
-					run_new_dealer_for_instrument( State, Instrument, DatesSettings );
+					run_new_dealer_for_instrument( State, Instrument );
 				false ->
 					{ State, DealerPid }
 			end;
 		error ->
-			run_new_dealer_for_instrument( State, Instrument, DatesSettings )
+			run_new_dealer_for_instrument( State, Instrument )
 	end,
-	From ! { dealer_pid, InstrumentDealerPid },
-	NewState.
+	{ reply, InstrumentDealerPid, NewState }.
 
-process_get_dealer( State, DatesSettings, From, { Instrument, Time, Price, Amount } ) ->
-	ValidDealArgs = bn_common:validate_deal_args( ?INSTRUMENTS, DatesSettings, Instrument, Time, Price, Amount ),
+process_get_dealer( State, Deal ) ->
+	ValidDealArgs = bn_common:validate_deal_args( ?INSTRUMENTS, get_dates_settings( State ), Deal ),
 
-	NewState = case ValidDealArgs of
+	case ValidDealArgs of
 		true ->
-			process_get_dealer_for_instrument( State, DatesSettings, From, { Instrument, Time, Price, Amount } );
+			process_get_dealer_for_instrument( State, Deal );
 		{ error, ValidationErrorDescr } ->
-			From ! { error, ValidationErrorDescr },
-			State
-	end,
-	bn_server:loop( NewState, DatesSettings ).
+			{reply, { error, ValidationErrorDescr }, State}
+	end.
 
 %returns { ok, { DealerPid, ExpirationDate } } or error
 find_dealer_info( State, Instrument ) ->
@@ -103,37 +179,3 @@ set_dealer_info( State, Instrument, DealerInfo ) ->
 	{ ok, DealerPidAndExpDateByInstrument } = dict:find( dealer_info_by_instrument, State ),
 	NewDealerPidAndExpDateByInstrument = dict:store( Instrument, DealerInfo, DealerPidAndExpDateByInstrument ),
 	dict:store( dealer_info_by_instrument, NewDealerPidAndExpDateByInstrument, State ).
-
-loop( State, DatesSettings ) ->
-	receive
-		{ echo, From, Msg } ->
-			From ! { reply, Msg },
-			bn_server:loop( State, DatesSettings );
-		stop ->
-			io:fwrite( "Exit normally~n" ),
-			exit(normal);
-
-		%get dealer for arguments
-		{ get_dealer, From, { Instrument, Time, Price, Amount } } ->
-			process_get_dealer( State, DatesSettings, From, { Instrument, Time, Price, Amount } );
-
-		% test push notifications
-		{ push_subscribe, From } ->
-			io:fwrite( "srv: push_subscribed~n" ),
-			run_report_timer( From, 5 ),
-			bn_server:loop( State, DatesSettings );
-		{ push_notification, From, 0 } ->
-			io:fwrite( "srv: push_notification: ~p~n", [0] ),
-			send_report( From, 0 ),
-			From ! finish,
-			bn_server:loop( State, DatesSettings );
-		{ push_notification, From, Num } ->
-			io:fwrite( "srv: push_notification: ~p~n", [Num] ),
-			send_report( From, Num ),
-			run_report_timer( From, Num - 1 ),
-			bn_server:loop( State, DatesSettings );
-
-		Other ->
-			io:fwrite( "Unhandled server msg~p~n", [Other] ),
-			bn_server:loop( State, DatesSettings )
-	end.

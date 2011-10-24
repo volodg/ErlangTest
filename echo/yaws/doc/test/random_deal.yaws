@@ -3,7 +3,7 @@
 	%request example: http://localhost:8000/test/random_deal.yaws
 	out(Arg) ->
 		{ Instrument, Time, Price, Amount } = random_args(),
-		Response = bn_client:deal( Instrument, Time, Price, Amount ),
+		Response = bn_server:deal( { Instrument, Time, Price, Amount } ),
 		case Response of
 			{ ok, Resp } ->
 				{ html, Resp };

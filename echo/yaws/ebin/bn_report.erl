@@ -38,7 +38,7 @@ handle_call(_Request, _From, State) ->
 	{noreply, State}.
 
 %%--------------------------------------------------------------------
-%% Function: create_account(Name) -> ok
+%% Function: notify(Msg) -> ok
 %% Description: Creates a bank account for the person with name Name
 %%--------------------------------------------------------------------
 notify(Msg) ->

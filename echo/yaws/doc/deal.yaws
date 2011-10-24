@@ -4,7 +4,7 @@
 	out(Arg) ->
 		case catch parsed_args(Arg) of
 			{ Instrument, Time, Price, Amount } ->
-				Response = bn_client:deal( Instrument, Time, Price, Amount ),
+				Response = bn_server:deal( { Instrument, Time, Price, Amount } ),
 				case Response of
 					{ ok, Resp } ->
 						{ html, Resp };

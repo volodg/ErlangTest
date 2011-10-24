@@ -1,6 +1,6 @@
 -module(bn_common).
 
--export([validate_deal_args/6,priority_receive/2]).
+-export([validate_deal_args/3,priority_receive/2]).
 
 valid_price( Price ) ->
 	case is_number( Price ) of
@@ -34,7 +34,8 @@ valid_deal_datetime( Datetime, DatesSettings ) ->
 	end.
 
 %returns true or { false, ValidateErrorDescription }
-validate_deal_args( Instruments, DatesSettings, Instrument, Time, Price, Amount ) ->
+validate_deal_args( Instruments, DatesSettings, Deal ) ->
+	{ Instrument, Time, Price, Amount } = Deal,
 	ValidDatetime   = valid_deal_datetime( Time, DatesSettings ),
 	ValidInstrument = sets:is_element( Instrument, sets:from_list( Instruments ) ),
 	ValidPrice      = valid_price( Price ),

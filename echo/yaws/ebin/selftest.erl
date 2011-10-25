@@ -20,9 +20,8 @@ run() ->
 			Other
 	end.
 
-test_random_normal_deal() ->
-	Deal = bn_common:random_deal(),
-	case bn_server:deal( Deal ) of
+check_dealer_response( Resp ) ->
+	case Resp of
 		{ok,_Msg} ->
 			io:fwrite( "New State~n" ),
 			true;
@@ -30,6 +29,10 @@ test_random_normal_deal() ->
 			io:fwrite( "Error~n" ),
 			throw( { error, "Deal failed", Other } )
 	end.
+
+test_random_normal_deal() ->
+	Deal = bn_common:random_deal(),
+	check_dealer_response( bn_server:deal( Deal ) ).
 
 test_invalid_instrument() ->
 	Deal = bn_common:random_deal(),
@@ -41,6 +44,9 @@ test_invalid_instrument() ->
 		Other ->
 			throw( { error, "Server should fail this deal", Other } )
 	end.
+
+%test_sum_of_deals_on_instument( Instrument ) ->
+%	
 
 test_deals() ->
 	test_random_normal_deal(),

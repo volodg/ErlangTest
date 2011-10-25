@@ -7,7 +7,8 @@
 ,valid_datetime_with_dates_settings/2
 ,valid_datetime/1
 ,nearest_expiration_datetime/1
-,datetime_difference_in_seconds/2]).
+,datetime_difference_in_seconds/2
+,now_datetime/0]).
 
 add_second_to_datetime(Seconds, Datetime) ->
 	StartSeconds = calendar:datetime_to_gregorian_seconds( Datetime ),
@@ -38,17 +39,14 @@ datetime_difference_in_seconds( FromDatetime, ToDatetime ) ->
 	ToDatetimeSeconds = calendar:datetime_to_gregorian_seconds( ToDatetime ),
 	ToDatetimeSeconds - FromDatetimeSeconds.
 
-%TODO remove recursion
+now_datetime() ->
+	{ date(), time() }.
+
 nearest_datetime_less_than_now( StartDatetime, Duration ) ->
-	NowDatetime = { date(), time() },
-	NextCurrentDatetime = add_second_to_datetime( Duration, StartDatetime ),
-	LessThen = datetime_earlier_than_datetime( NowDatetime, NextCurrentDatetime ),
-	case LessThen of
-		false ->
-			nearest_datetime_less_than_now( NextCurrentDatetime, Duration );
-		true ->
-			StartDatetime
-	end.
+	StartSeconds = calendar:datetime_to_gregorian_seconds( StartDatetime ),
+	NowSeconds   = calendar:datetime_to_gregorian_seconds( now_datetime() ),
+	NewSeconds   = StartSeconds + ( NowSeconds - StartSeconds ) div Duration * Duration,
+	calendar:gregorian_seconds_to_datetime( NewSeconds ).
 
 nearest_expiration_datetime( DatesSettings ) ->
 	{ StartDatetime, _EndDatetime, Duration } = DatesSettings,
@@ -57,7 +55,7 @@ nearest_expiration_datetime( DatesSettings ) ->
 
 valid_datetime_with_dates_settings( Datetime, DatesSettings ) ->
 	{ StartDatetime, EndDatetime, Duration } = DatesSettings,
-	NowDatetime = { date(), time() },
+	NowDatetime = now_datetime(),
 	ValidNowDatetime = datetime_within_datetimes( NowDatetime, StartDatetime, EndDatetime ),
 	CurrentStartTime = nearest_datetime_less_than_now( StartDatetime, Duration ),
 	ValidDatetime = datetime_within_datetimes( Datetime, CurrentStartTime, NowDatetime ),

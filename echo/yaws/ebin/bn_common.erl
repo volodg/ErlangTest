@@ -64,8 +64,7 @@ priority_receive( Term, Otherwise ) ->
 	end.
 
 current_datetime() ->
-	%datetime:add_second_to_datetime( 60, { date(), time() } ).
-	{ date(), time() }.
+	datetime:now_datetime().
 
 random_instrument() ->
 	%"echo23".

@@ -130,10 +130,9 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 
 start_datetime() ->
-	StartDate = date(),
-	StartTime = time(),
-	io:fwrite( "StartDate: {~p,~p}~n", [ StartDate, StartTime ] ),
-	{ date(), time() }.
+	Datetime = datetime:now_datetime(),
+	io:fwrite( "StartDate: ~p~n", [ Datetime ] ),
+	Datetime.
 
 end_datetime( StartDatetime ) ->
 	DuratonInSeconds = ?REPORT_DURATION_SEC,

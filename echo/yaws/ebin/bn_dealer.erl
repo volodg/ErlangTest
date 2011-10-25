@@ -89,8 +89,8 @@ loop( DealerInstrument, ExpirationDatetime, State ) ->
 dealer( InstrumentName, ExpirationDatetime ) ->
 	%init here timer, state and etc
 
-	%TODO if { date(), time() } > ExpirationDatetime ????
-	Delay = datetime:datetime_difference_in_seconds( { date(), time() }, ExpirationDatetime ) * 1000,
+	%TODO if datetime:now_datetime() > ExpirationDatetime ????
+	Delay = datetime:datetime_difference_in_seconds( datetime:now_datetime(), ExpirationDatetime ) * 1000,
 	timer:send_after( Delay, send_report ),
 
 	TotalAmount = 0,

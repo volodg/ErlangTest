@@ -95,7 +95,7 @@ receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, Tota
 	end.
 
 test_sum_of_deals_on_instument( Instrument ) ->
-	Datetime = { date(), time() },
+	Datetime = datetime:now_datetime(),
 	Deal1 = { Instrument, Datetime, 1.4, 1 },
 	Deal2 = { Instrument, Datetime, 1.1, 2 },
 	Deal3 = { Instrument, Datetime, 1.9, 3 },
@@ -108,7 +108,7 @@ test_sum_of_deals_on_instument( Instrument ) ->
 
 	bn_report:subscribe( self() ),
 
-	NowDatetime = { date(), time() },
+	NowDatetime = datetime:now_datetime(),
 	DatetimeDuration = datetime:add_second_to_datetime( ?REPORT_DURATION_SEC, NowDatetime ),
 	Delay = datetime:datetime_difference_in_seconds( NowDatetime, DatetimeDuration ) * 1000 + 10,
 	receive_report_loop( Instrument, 1.4, 1.5, 1.1, 1.9, 10, Delay ).
@@ -125,6 +125,6 @@ test_deals() ->
 	test_out_of_trading_datetime( {{2000, 11, 10},{20,20,21}} ),
 	test_out_of_trading_datetime( {{3020, 11, 10},{20,20,21}} ),
 
-	% test_sum_of_deals_on_instument( "echo1" ),
-	% test_sum_of_deals_on_instument( "echo2" ),
+	test_sum_of_deals_on_instument( "echo1" ),
+	test_sum_of_deals_on_instument( "echo2" ),
 	true.

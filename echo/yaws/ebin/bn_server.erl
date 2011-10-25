@@ -24,14 +24,12 @@
 start() ->
 	case gen_server:start_link({local, ?SERVER}, ?MODULE, [], []) of
 		{ok,_Pid} ->
-			true;
-		ignore ->
-			true;
+			ok;
 		{error,{already_started,Pid}} ->
 			exit(Pid, kill),
-			start();
-		{error,_Error} ->
-			false
+			{error,{already_started,Pid}};
+		Other ->
+			Other
 	end.
 
 %%--------------------------------------------------------------------
@@ -39,18 +37,23 @@ start() ->
 %% Description: Creates a bank account for the person with name Name
 %%--------------------------------------------------------------------
 deal( Deal ) ->
-	DealerPid = gen_server:call( { ?SERVER, ?SRV_NODE }, {get_dealer, Deal}),
-	DealerPid ! { self(), Deal },
-	%TODO change this
-	receive
-		{ reply, Response } ->
-			{ ok, Response };
-		{ error, ErrorDescr } ->
-			{ error, ErrorDescr };
-		timeout ->%TODO remove???
-			timeout
-	after 500 ->
-		timeout
+	Response = gen_server:call( { ?SERVER, ?SRV_NODE }, {get_dealer, Deal}),
+	case Response of
+		{ error, ValidationErrorDescr } ->
+			{ error, ValidationErrorDescr };
+		{ dealer_pid, DealerPid } ->
+			DealerPid ! { self(), Deal },
+			%TODO change this
+			receive
+				{ reply, Msg } ->
+					{ ok, Msg };
+				{ error, ErrorDescr } ->
+					{ error, ErrorDescr };
+				Other ->
+					io:fwrite( "Other!!!: ~p~n", [Other] )
+			after 500 ->
+				timeout
+			end
 	end.
 
 %%====================================================================
@@ -168,7 +171,7 @@ process_get_dealer_for_instrument( State, { Instrument, _Time, _Price, _Amount }
 		error ->
 			run_new_dealer_for_instrument( State, Instrument )
 	end,
-	{ reply, InstrumentDealerPid, NewState }.
+	{ reply, { dealer_pid, InstrumentDealerPid }, NewState }.
 
 process_get_dealer( State, Deal ) ->
 	ValidDealArgs = bn_common:validate_deal_args( ?INSTRUMENTS, get_dates_settings( State ), Deal ),

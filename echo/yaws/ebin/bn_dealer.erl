@@ -4,14 +4,26 @@
 
 -include("bn_config.hrl").
 
-process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } ) ->
+% log_deal( { DealInstrument, DealTime, DealPrice, DealAmount } ) ->
+% 	io:fwrite( "In Instrument: ~p~n", [DealInstrument] ),
+% 	io:fwrite( "In Time: ~p~n", [DealTime] ),
+% 	io:fwrite( "In Price: ~p~n", [DealPrice] ),
+% 	io:fwrite( "In Amount: ~p~n", [DealAmount] ),
+% 	io:fwrite( "------------------------~n" ).
+% 
+% log_deal_rep( { _NewOpenTime, NewOpenPrice, NewClosePrice, NewMinPrice, NewMaxPrice, NewTotalAmount } ) ->
+% 	io:fwrite( "Out NewOpenPrice: ~p~n", [NewOpenPrice] ),
+% 	io:fwrite( "Out NewClosePrice: ~p~n", [NewClosePrice] ),
+% 	io:fwrite( "Out NewMinPrice: ~p~n", [NewMinPrice] ),
+% 	io:fwrite( "Out NewMaxPrice: ~p~n", [NewMaxPrice] ),
+% 	io:fwrite( "Out NewTotalAmount: ~p~n", [NewTotalAmount] ),
+% 	io:fwrite( "------------------------~n" ).
+
+process_deal( State, From, { _DealInstrument, _DealTime, DealPrice, DealAmount } ) ->
+	io:fwrite( "try process_deal: ~p~n", [{ _DealInstrument, _DealTime, DealPrice, DealAmount }] ),
 	{ _OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = State,
 
-	io:fwrite( "In Instrument: ~p~n", [DealInstrument] ),
-	io:fwrite( "In Time: ~p~n", [DealTime] ),
-	io:fwrite( "In Price: ~p~n", [DealPrice] ),
-	io:fwrite( "In Amount: ~p~n", [DealAmount] ),
-	io:fwrite( "------------------------~n" ),
+	% log_deal( { DealInstrument, DealTime, DealPrice, DealAmount } ),
 
 	NewState = case TotalAmount of
 		0 ->
@@ -26,13 +38,7 @@ process_deal( State, From, { DealInstrument, DealTime, DealPrice, DealAmount } )
 	end,
 	From ! { reply, "Good deal" },
 
-	{ _NewOpenTime, NewOpenPrice, NewClosePrice, NewMinPrice, NewMaxPrice, NewTotalAmount } = NewState,
-	io:fwrite( "Out NewOpenPrice: ~p~n", [NewOpenPrice] ),
-	io:fwrite( "Out NewClosePrice: ~p~n", [NewClosePrice] ),
-	io:fwrite( "Out NewMinPrice: ~p~n", [NewMinPrice] ),
-	io:fwrite( "Out NewMaxPrice: ~p~n", [NewMaxPrice] ),
-	io:fwrite( "Out NewTotalAmount: ~p~n", [NewTotalAmount] ),
-	io:fwrite( "------------------------~n" ),
+	% log_deal_rep( NewState ),
 
 	NewState.
 
@@ -40,7 +46,9 @@ send_report( DealerInstrument, State ) ->
 	{ OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } = State,
 	case TotalAmount of
 		TotalAmount when TotalAmount > 0 ->
-			bn_report:notify( { report, DealerInstrument, OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } )
+			bn_report:notify( { report, DealerInstrument, OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } );
+		_Other ->
+			ignore
 	end,
 	exit( normal ).
 
@@ -86,7 +94,6 @@ dealer( InstrumentName, ExpirationDatetime ) ->
 	Delay = datetime:datetime_difference_in_seconds( { date(), time() }, ExpirationDatetime ) * 1000,
 	timer:send_after( Delay, send_report ),
 
-	io:fwrite( "Start Dealer For Instrument: ~p~n", [InstrumentName] ),
 	TotalAmount = 0,
 	OpenPrice = 0,
 	ClosePrice = 0,

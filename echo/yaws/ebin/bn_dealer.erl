@@ -35,7 +35,7 @@ process_deal( State, From, { _DealInstrument, _DealTime, DealPrice, DealAmount }
 			RecMaxPrice = max( MaxPrice, DealPrice ),
 			{ _OpenTime, OpenPrice, RecClosePrice, RecMinPrice, RecMaxPrice, RecTotalAmount }
 	end,
-	From ! { reply, "Good deal" },
+	From ! { reply, self(), "Good deal" },
 
 	% log_deal_rep( NewState ),
 
@@ -64,7 +64,7 @@ clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
 				true ->
 					process_deal( State, From, Deal );
 				{ error, ValidationErrorDescr } ->
-					From ! { error, ValidationErrorDescr },
+					From ! { error, self(), ValidationErrorDescr },
 					State
 			end,
 

@@ -43,14 +43,11 @@ deal( Deal ) ->
 			{ error, ValidationErrorDescr };
 		{ dealer_pid, DealerPid } ->
 			DealerPid ! { self(), Deal },
-			%TODO change this
 			receive
-				{ reply, Msg } ->
+				{ reply, DealerPid, Msg } ->
 					{ ok, Msg };
-				{ error, ErrorDescr } ->
-					{ error, ErrorDescr };
-				Other ->
-					io:fwrite( "Other!!!: ~p~n", [Other] )
+				{ error, DealerPid, ErrorDescr } ->
+					{ error, ErrorDescr }
 			after 500 ->
 				timeout
 			end

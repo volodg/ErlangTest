@@ -1,6 +1,6 @@
 -module(bn_common).
 
--export([validate_deal_args/3,priority_receive/2]).
+-export([validate_deal_args/3,priority_receive/2,random_deal/0]).
 
 valid_price( Price ) ->
 	case is_number( Price ) of
@@ -54,6 +54,7 @@ validate_deal_args( Instruments, DatesSettings, Deal ) ->
 			{ error, "Invalid Amount, It should be larger then zero and integer" }
 	end.
 
+%TODO remove
 priority_receive( Term, Otherwise ) ->
 	receive
 		Term ->
@@ -61,3 +62,28 @@ priority_receive( Term, Otherwise ) ->
 	    after 0 ->
 	    	Otherwise()
 	end.
+
+current_datetime() ->
+	%datetime:add_second_to_datetime( 60, { date(), time() } ).
+	{ date(), time() }.
+
+random_instrument() ->
+	%"echo23".
+	lists:append( "echo", integer_to_list(random:uniform(10)) ).
+
+random_price() ->
+	erlang:round( ( random:uniform() + 1 ) * 100 ) / 100.
+
+random_amount() ->
+	random:uniform(1000).
+
+random_deal() ->
+	{A1,A2,A3} = now(),
+	random:seed(A1, A2, A3),
+
+	DateTime = current_datetime(),
+	Instrument = random_instrument(),
+	Price = random_price(),
+	Amount = random_amount(),
+
+	{ Instrument, DateTime, Price, Amount }.

@@ -23,7 +23,6 @@ run() ->
 check_dealer_response( Resp ) ->
 	case Resp of
 		{ok,_Msg} ->
-			io:fwrite( "New State~n" ),
 			true;
 		Other ->
 			io:fwrite( "Error~n" ),
@@ -45,10 +44,19 @@ test_invalid_instrument() ->
 			throw( { error, "Server should fail this deal", Other } )
 	end.
 
-%test_sum_of_deals_on_instument( Instrument ) ->
-%	
+test_sum_of_deals_on_instument( Instrument ) ->
+	DateTime = { date(), time() },
+	Deal1 = { Instrument, DateTime, 1.1, 10 },
+	Deal2 = { Instrument, DateTime, 1.9, 5 },
+
+	check_dealer_response( bn_server:deal( Deal1 ) ),
+	check_dealer_response( bn_server:deal( Deal2 ) ),
+
+	true.
 
 test_deals() ->
 	test_random_normal_deal(),
 	test_invalid_instrument(),
+
+	test_sum_of_deals_on_instument( "echo1" ),
 	true.

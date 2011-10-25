@@ -20,7 +20,6 @@
 % 	io:fwrite( "------------------------~n" ).
 
 process_deal( State, From, { _DealInstrument, _DealTime, DealPrice, DealAmount } ) ->
-	io:fwrite( "try process_deal: ~p~n", [{ _DealInstrument, _DealTime, DealPrice, DealAmount }] ),
 	{ _OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = State,
 
 	% log_deal( { DealInstrument, DealTime, DealPrice, DealAmount } ),

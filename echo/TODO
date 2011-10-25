@@ -23,15 +23,16 @@ millisecondsToDate(Milliseconds) ->
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-1.1.1. Rename all functions from adsDSF to asd_sad
+1. Write "self tester" and benchmark
 
-2. Merge Long argument list in GlobalState
+2. Document all
 
-3. Dealer has timeout end exit normal when it is
-4, Send report from dealer and push
+3. Test different issues, errors and timeouts
+
+4. Precess crashes in Supervisor
 
 5. remove Pid when exit or crash from DealerPidAndExpDateByInstrument
 
 6. Send empty reports also ?!
 
-7. Rewrite server using gen_server behaviour !!!
+7. Fix all TODO

@@ -24,7 +24,6 @@ check_dealer_response( Resp ) ->
 		{ok,_Msg} ->
 			true;
 		Other ->
-			io:fwrite( "Error~n" ),
 			throw( { error, "Deal failed", Other } )
 	end.
 
@@ -56,12 +55,23 @@ test_invalid_datetime_format() ->
 			throw( { error, "Server should fail this deal", Other } )
 	end.
 
+test_out_of_trading_datetime( Datetime ) ->
+	Deal = bn_common:random_deal(),
+	{ Instrument, _DateTime, Price, Amount } = Deal,
+	NewDeal = { Instrument, Datetime, Price, Amount },
+ 	case bn_server:deal( NewDeal ) of
+		{error,_Msg} ->
+			true;
+		_Other ->
+			throw( { error, "Server should fail this deal", [_Other] } )
+	end.
+
 receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount, Delay ) ->
 	receive
 		{ report, Instrument, _OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } ->
 			io:fwrite( "Report received for Instrument: ~p~n", [ Instrument ] ),
 			true;
-		_Other ->
+		{ report, _OtherInstrument, _OtherOpenDatetime, _OtherOpenPrice, _OtherClosePrice, _OtherMinPrice, _OtherMaxPrice, _OtherTotalAmount } ->
 			receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount, Delay )
 		after Delay ->
 			throw( { error, "Have no valid report for instrument", [Instrument] } )
@@ -89,8 +99,11 @@ test_sum_of_deals_on_instument( Instrument ) ->
 test_deals() ->
 	test_random_normal_deal(),
 	test_invalid_instrument(),
-%	test_invalid_datetime_format(),
+	test_invalid_datetime_format(),
 
-	test_sum_of_deals_on_instument( "echo1" ),
-	test_sum_of_deals_on_instument( "echo2" ),
+	test_out_of_trading_datetime( {{2000, 11, 10},{20,20,21}} ),
+	test_out_of_trading_datetime( {{2020, 11, 10},{20,20,21}} ),
+
+	%test_sum_of_deals_on_instument( "echo1" ),
+	%test_sum_of_deals_on_instument( "echo2" ),
 	true.

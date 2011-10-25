@@ -79,9 +79,9 @@ valid_time(_,_,_) -> false.
 
 valid_datetime( Datetime ) ->
 	case Datetime of
-		{ Date, Time } ->
-			ValidDate = calendar:valid_date( Date ),
-			ValidTime = valid_time( Time ),
+		{ {Year,Month,Day}, {Hour,Minute,Seconds} } ->
+			ValidDate = calendar:valid_date( {Year,Month,Day} ),
+			ValidTime = valid_time( {Hour,Minute,Seconds} ),
 			case { ValidDate, ValidTime } of
 				{ true, true } ->
 					true;

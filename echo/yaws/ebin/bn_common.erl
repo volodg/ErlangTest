@@ -81,9 +81,9 @@ random_deal() ->
 	{A1,A2,A3} = now(),
 	random:seed(A1, A2, A3),
 
-	DateTime = current_datetime(),
+	Datetime = current_datetime(),
 	Instrument = random_instrument(),
 	Price = random_price(),
 	Amount = random_amount(),
 
-	{ Instrument, DateTime, Price, Amount }.
+	{ Instrument, Datetime, Price, Amount }.

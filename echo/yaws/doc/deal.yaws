@@ -17,15 +17,15 @@
 
 	%no strong arguments validation
 	date_arg(Arg) ->
-		QDateTime = queryvar(Arg, date),
-		DateTimeString = case QDateTime of
-			{ ok, DateTimeStr } ->
-				DateTimeStr;
+		QDatetime = queryvar(Arg, date),
+		DatetimeString = case QDatetime of
+			{ ok, DatetimeStr } ->
+				DatetimeStr;
 			undefined ->
 				throw({error, "Empty date parameter, please specify deal date like this: ?date=year:month:day:hours:minutes:seconds"})
 			end,
-		SplitDateTime = string:tokens( DateTimeString, ":" ),
-		case SplitDateTime of
+		SplitDatetime = string:tokens( DatetimeString, ":" ),
+		case SplitDatetime of
 			[ Year, Month, Day, Hours, Minutes, Seconds ] ->
 				Date = { list_to_integer(Year), list_to_integer(Month), list_to_integer(Day) },
 				Time = { list_to_integer(Hours), list_to_integer(Minutes), list_to_integer(Seconds) },
@@ -62,10 +62,10 @@
 		end.
 
 	parsed_args(Arg) ->
-		DateTime = date_arg(Arg),
+		Datetime = date_arg(Arg),
 		Instrument = instrument_arg(Arg),
 		Price = price_arg(Arg),
 		Amount = amount_arg(Arg),
 
-		{ Instrument, DateTime, Price, Amount }.
+		{ Instrument, Datetime, Price, Amount }.
 </erl>

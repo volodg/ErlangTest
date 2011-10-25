@@ -98,6 +98,6 @@ dealer( InstrumentName, ExpirationDatetime ) ->
 	ClosePrice = 0,
 	MinPrice = 0,
 	MaxPrice = 0,
-	OpenDateTime = datetime:add_second_to_datetime( -?REPORT_DURATION_SEC, ExpirationDatetime ),
-	InitState = { OpenDateTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
+	OpenDatetime = datetime:add_second_to_datetime( -?REPORT_DURATION_SEC, ExpirationDatetime ),
+	InitState = { OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
 	loop( InstrumentName, ExpirationDatetime, InitState ).

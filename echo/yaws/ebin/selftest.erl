@@ -19,7 +19,7 @@ run() ->
 			Other
 	end.
 
-check_dealer_response( Resp ) ->
+valid_dealer_response( Resp ) ->
 	case Resp of
 		{ok,_Msg} ->
 			true;
@@ -27,44 +27,61 @@ check_dealer_response( Resp ) ->
 			throw( { error, "Deal failed", Other } )
 	end.
 
+invalid_dealer_response( Resp ) ->
+	case Resp of
+		{error,_Msg} ->
+			true;
+		Other ->
+			throw( { error, "Server should fail this deal", Other } )
+	end.
+
 test_random_normal_deal() ->
 	Deal = bn_common:random_deal(),
-	{ _Instrument, DateTime, Price, Amount } = Deal,
-	check_dealer_response( bn_server:deal( { "echo3", DateTime, Price, Amount } ) ).
+	{ _Instrument, Datetime, Price, Amount } = Deal,
+	valid_dealer_response( bn_server:deal( { "echo3", Datetime, Price, Amount } ) ).
 
 test_invalid_instrument() ->
 	Deal = bn_common:random_deal(),
-	{ _Instrument, DateTime, Price, Amount } = Deal,
-	NewDeal = { "some_invalid_instrument", DateTime, Price, Amount },
- 	case bn_server:deal( NewDeal ) of
-		{error,_Msg} ->
-			true;
-		Other ->
-			throw( { error, "Server should fail this deal", Other } )
-	end.
+	{ _Instrument, Datetime, Price, Amount } = Deal,
+	NewDeal = { "some_invalid_instrument", Datetime, Price, Amount },
+ 	invalid_dealer_response( bn_server:deal( NewDeal ) ).
 
 test_invalid_datetime_format() ->
 	Deal = bn_common:random_deal(),
-	{ Instrument, _DateTime, Price, Amount } = Deal,
-	InvalidDateTime = { 10, "23" },
-	NewDeal = { Instrument, InvalidDateTime, Price, Amount },
- 	case bn_server:deal( NewDeal ) of
-		{error,_Msg} ->
-			true;
-		Other ->
-			throw( { error, "Server should fail this deal", Other } )
-	end.
+	{ Instrument, _Datetime, Price, Amount } = Deal,
+	InvalidDatetime = { 10, "23" },
+	NewDeal = { Instrument, InvalidDatetime, Price, Amount },
+ 	invalid_dealer_response( bn_server:deal( NewDeal ) ).
 
 test_out_of_trading_datetime( Datetime ) ->
 	Deal = bn_common:random_deal(),
-	{ Instrument, _DateTime, Price, Amount } = Deal,
+	{ Instrument, _Datetime, Price, Amount } = Deal,
 	NewDeal = { Instrument, Datetime, Price, Amount },
- 	case bn_server:deal( NewDeal ) of
-		{error,_Msg} ->
-			true;
-		_Other ->
-			throw( { error, "Server should fail this deal", [_Other] } )
-	end.
+ 	invalid_dealer_response( bn_server:deal( NewDeal ) ).
+
+test_invalid_deal_price_format() ->
+	Deal = bn_common:random_deal(),
+	{ Instrument, Datetime, _Price, Amount } = Deal,
+	NewDeal = { Instrument, Datetime, "Price", Amount },
+ 	invalid_dealer_response( bn_server:deal( NewDeal ) ).
+
+test_invalid_deal_price() ->
+	Deal = bn_common:random_deal(),
+	{ Instrument, Datetime, _Price, Amount } = Deal,
+	NewDeal = { Instrument, Datetime, 0, Amount },
+ 	invalid_dealer_response( bn_server:deal( NewDeal ) ).
+
+test_invalid_deal_amount_format() ->
+	Deal = bn_common:random_deal(),
+	{ Instrument, Datetime, Price, _Amount } = Deal,
+	NewDeal = { Instrument, Datetime, Price, "Amount" },
+ 	invalid_dealer_response( bn_server:deal( NewDeal ) ).
+
+test_invalid_deal_amount() ->
+	Deal = bn_common:random_deal(),
+	{ Instrument, Datetime, Price, _Amount } = Deal,
+	NewDeal = { Instrument, Datetime, Price, 0 },
+ 	invalid_dealer_response( bn_server:deal( NewDeal ) ).
 
 receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount, Delay ) ->
 	receive
@@ -78,16 +95,16 @@ receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, Tota
 	end.
 
 test_sum_of_deals_on_instument( Instrument ) ->
-	DateTime = { date(), time() },
-	Deal1 = { Instrument, DateTime, 1.4, 1 },
-	Deal2 = { Instrument, DateTime, 1.1, 2 },
-	Deal3 = { Instrument, DateTime, 1.9, 3 },
-	Deal4 = { Instrument, DateTime, 1.5, 4 },
+	Datetime = { date(), time() },
+	Deal1 = { Instrument, Datetime, 1.4, 1 },
+	Deal2 = { Instrument, Datetime, 1.1, 2 },
+	Deal3 = { Instrument, Datetime, 1.9, 3 },
+	Deal4 = { Instrument, Datetime, 1.5, 4 },
 
-	check_dealer_response( bn_server:deal( Deal1 ) ),
-	check_dealer_response( bn_server:deal( Deal2 ) ),
-	check_dealer_response( bn_server:deal( Deal3 ) ),
-	check_dealer_response( bn_server:deal( Deal4 ) ),
+	valid_dealer_response( bn_server:deal( Deal1 ) ),
+	valid_dealer_response( bn_server:deal( Deal2 ) ),
+	valid_dealer_response( bn_server:deal( Deal3 ) ),
+	valid_dealer_response( bn_server:deal( Deal4 ) ),
 
 	bn_report:subscribe( self() ),
 
@@ -100,10 +117,14 @@ test_deals() ->
 	test_random_normal_deal(),
 	test_invalid_instrument(),
 	test_invalid_datetime_format(),
+	test_invalid_deal_price_format(),
+	test_invalid_deal_price(),
+	test_invalid_deal_amount_format(),
+	test_invalid_deal_amount(),
 
 	test_out_of_trading_datetime( {{2000, 11, 10},{20,20,21}} ),
-	test_out_of_trading_datetime( {{2020, 11, 10},{20,20,21}} ),
+	test_out_of_trading_datetime( {{3020, 11, 10},{20,20,21}} ),
 
-	%test_sum_of_deals_on_instument( "echo1" ),
-	%test_sum_of_deals_on_instument( "echo2" ),
+	% test_sum_of_deals_on_instument( "echo1" ),
+	% test_sum_of_deals_on_instument( "echo2" ),
 	true.

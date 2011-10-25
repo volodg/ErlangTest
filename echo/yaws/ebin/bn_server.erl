@@ -71,9 +71,9 @@ init([]) ->
 
 	State = dict:store( dealer_info_by_instrument, dict:new(), dict:new() ),
 
-	StartDateTime = start_datetime(),
-	{ EndDatetime, Duration } = end_datetime( StartDateTime ),
-	NewState = dict:store( dete_settings, { StartDateTime, EndDatetime, Duration }, State ),
+	StartDatetime = start_datetime(),
+	{ EndDatetime, Duration } = end_datetime( StartDatetime ),
+	NewState = dict:store( dete_settings, { StartDatetime, EndDatetime, Duration }, State ),
 
 	{ ok, NewState }.
 
@@ -135,11 +135,11 @@ start_datetime() ->
 	io:fwrite( "StartDate: {~p,~p}~n", [ StartDate, StartTime ] ),
 	{ date(), time() }.
 
-end_datetime( StartDateTime ) ->
+end_datetime( StartDatetime ) ->
 	DuratonInSeconds = ?REPORT_DURATION_SEC,
 	io:fwrite( "DuratonInSeconds: ~p~n", [DuratonInSeconds] ),
 	%TODO change 10000
-	{EndDate, EndTime} = datetime:add_second_to_datetime( DuratonInSeconds * 10000, StartDateTime ),
+	{EndDate, EndTime} = datetime:add_second_to_datetime( DuratonInSeconds * 10000, StartDatetime ),
 	io:fwrite( "EndDate: {~p,~p}~n", [EndDate, EndTime] ),
 	{ {EndDate, EndTime}, DuratonInSeconds }.
 

@@ -39,15 +39,15 @@ datetime_difference_in_seconds( FromDatetime, ToDatetime ) ->
 	ToDatetimeSeconds - FromDatetimeSeconds.
 
 %TODO remove recursion
-nearest_datetime_less_than_now( StartDateTime, Duration ) ->
-	NowDateTime = { date(), time() },
-	NextCurrentDateTime = add_second_to_datetime( Duration, StartDateTime ),
-	LessThen = datetime_earlier_than_datetime( NowDateTime, NextCurrentDateTime ),
+nearest_datetime_less_than_now( StartDatetime, Duration ) ->
+	NowDatetime = { date(), time() },
+	NextCurrentDatetime = add_second_to_datetime( Duration, StartDatetime ),
+	LessThen = datetime_earlier_than_datetime( NowDatetime, NextCurrentDatetime ),
 	case LessThen of
 		false ->
-			nearest_datetime_less_than_now( NextCurrentDateTime, Duration );
+			nearest_datetime_less_than_now( NextCurrentDatetime, Duration );
 		true ->
-			StartDateTime
+			StartDatetime
 	end.
 
 nearest_expiration_datetime( DatesSettings ) ->

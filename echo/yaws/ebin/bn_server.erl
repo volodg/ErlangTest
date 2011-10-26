@@ -171,6 +171,8 @@ process_get_dealer_for_instrument( State, { Instrument, _Time, _Price, _Amount }
 
 process_get_dealer( State, Deal ) ->
 	ValidDealArgs = bn_common:validate_deal_args( ?INSTRUMENTS, get_dates_settings( State ), Deal ),
+	%{ _Instrument, DealDatetime, _Price, _Amount } = Deal,
+	%ValidDealArgs = datetime:valid_datetime( DealDatetime ),
 
 	case ValidDealArgs of
 		true ->

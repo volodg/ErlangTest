@@ -35,8 +35,8 @@ notify(Msg) ->
 
 %TODO think again
 subscribe(_Pid) ->
-	%gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, Pid}).
-	gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe ).
+	gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, _Pid}).
+	%gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe ).
 
 %TODO remove Pid argument
 unsubscribe(Pid) ->

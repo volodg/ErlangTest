@@ -26,17 +26,6 @@
 start_link() ->
 	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
-%%                                      {reply, Reply, State, Timeout} |
-%%                                      {noreply, State} |
-%%                                      {noreply, State, Timeout} |
-%%                                      {stop, Reason, Reply, State} |
-%%                                      {stop, Reason, State}
-%% Description: Handling call messages
-%%--------------------------------------------------------------------
-handle_call(_Request, _From, State) ->
-	{noreply, State}.
-
 %%--------------------------------------------------------------------
 %% Function: notify(Msg) -> ok
 %% Description: Creates a bank account for the person with name Name
@@ -44,11 +33,16 @@ handle_call(_Request, _From, State) ->
 notify(Msg) ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {notify_all, Msg}).
 
-subscribe(Pid) ->
-	gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, Pid}).
+%TODO think again
+subscribe(_Pid) ->
+	%gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, Pid}).
+	gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe ).
 
+%TODO remove Pid argument
 unsubscribe(Pid) ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {unsubscribe, Pid}).
+
+%TODO do notification via "gen_server:call" !!!
 
 %%====================================================================
 %% gen_server callbacks
@@ -83,6 +77,21 @@ handle_cast({subscribe, Pid}, State) ->
 handle_cast({unsubscribe, Pid}, State) ->
 	NewState = lists:delete(Pid, State),
 	{noreply, NewState}.
+
+%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+%%--------------------------------------------------------------------
+handle_call(subscribe, From, State) ->
+	NewState = lists:append(State, [From]),
+	{reply, ok, NewState};
+
+handle_call(_Request, _From, State) ->
+	{noreply, State}.
 
 %%--------------------------------------------------------------------
 %% Function: handle_info(Info, State) -> {noreply, State} |

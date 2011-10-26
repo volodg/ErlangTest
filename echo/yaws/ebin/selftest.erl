@@ -95,6 +95,9 @@ receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, Tota
 	end.
 
 test_sum_of_deals_on_instument( Instrument ) ->
+	{A1,A2,A3} = now(),
+	random:seed(A1, A2, A3),
+
 	Datetime = datetime:now_datetime(),
 	Deal1 = { Instrument, Datetime, 1.4, 1 },
 	Deal2 = { Instrument, Datetime, 1.1, 2 },

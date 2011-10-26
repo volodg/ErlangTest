@@ -51,40 +51,40 @@ send_report( DealerInstrument, State ) ->
 	end,
 	exit( normal ).
 
-clients_loop( DealerInstrument, ExpirationDatetime, State ) ->
+loop( DealerInstrument, ExpirationDatetime, State ) ->
 	receive
 		{ From, Deal } ->
-			DurationInSeconds = ?REPORT_DURATION_SEC,
-			StartDatetime = datetime:add_second_to_datetime( -DurationInSeconds, ExpirationDatetime ),
-			DatesSettings = { StartDatetime, ExpirationDatetime, DurationInSeconds },
-
-			ValidDealArgs = bn_common:validate_deal_args( [ DealerInstrument ], DatesSettings, Deal ),
-
-			NewState = case ValidDealArgs of
+			Expared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), ExpirationDatetime ),
+			case Expared of
 				true ->
-					process_deal( State, From, Deal );
-				{ error, ValidationErrorDescr } ->
-					From ! { error, self(), ValidationErrorDescr },
-					State
-			end,
+					send_report( DealerInstrument, State );
+					%TODO set new ExpirationDatetime and process anywhere for performane isseu
+				false ->
+					DurationInSeconds = ?REPORT_DURATION_SEC,
+					StartDatetime = datetime:add_second_to_datetime( -DurationInSeconds, ExpirationDatetime ),
+					DatesSettings = { StartDatetime, ExpirationDatetime, DurationInSeconds },
 
-			loop( DealerInstrument, ExpirationDatetime, NewState );
+					ValidDealArgs = bn_common:validate_deal_args( [ DealerInstrument ], DatesSettings, Deal ),
+					% { _DealInstrument, DealTime, _DealPrice, _DealAmount } = Deal,
+					% ValidDealArgs = datetime:datetime_earlier_than_datetime( DealTime, ExpirationDatetime ),
+					% ValidDealArgs = true,
+
+					NewState = case ValidDealArgs of
+						true ->
+							process_deal( State, From, Deal );
+						{ error, ValidationErrorDescr } ->
+							From ! { error, self(), ValidationErrorDescr },
+							State
+					end,
+
+					loop( DealerInstrument, ExpirationDatetime, NewState )
+			end;
 		send_report ->
 			send_report( DealerInstrument, State );
 		Other ->
 			io:fwrite( "Unhandled msg in dealer (should not happen): ~p~n", [Other] ),
 			loop( DealerInstrument, ExpirationDatetime, State )
 	end.
-
-%TODO validate Only date if for performance issue,
-% other arguments validated by bn_server or vise versa
-loop( DealerInstrument, ExpirationDatetime, State ) ->
-	%TODO does it's tail recursion if callback used???
-	bn_common:priority_receive( send_report, fun() ->
-		clients_loop( DealerInstrument, ExpirationDatetime, State )
-		end ),
-	%TODO remove this or use NewState instead of State ( test performance before ) 
-	send_report( DealerInstrument, State ).
 
 dealer( InstrumentName, ExpirationDatetime ) ->
 	%init here timer, state and etc

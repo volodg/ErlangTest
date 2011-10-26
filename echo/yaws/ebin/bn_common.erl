@@ -77,9 +77,6 @@ random_amount() ->
 	random:uniform(1000).
 
 random_deal() ->
-	{A1,A2,A3} = now(),
-	random:seed(A1, A2, A3),
-
 	Datetime = current_datetime(),
 	Instrument = random_instrument(),
 	Price = random_price(),

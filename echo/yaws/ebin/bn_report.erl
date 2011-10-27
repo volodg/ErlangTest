@@ -37,7 +37,6 @@ subscribe() ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, self()}).
 
 sync_subscribe() ->
-	io:fwrite( "sync_subscribe: ~p~n", [self()] ),
 	gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe).
 
 %TODO remove Pid argument
@@ -101,7 +100,7 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
-handle_info({'EXIT',Pid,_ExitType}, State) ->
+handle_info({'EXIT',Pid,_Reason}, State) ->
 	NewState = lists:delete(Pid, State),
 	{noreply, NewState};
 

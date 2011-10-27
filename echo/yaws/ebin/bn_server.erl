@@ -148,7 +148,7 @@ get_dates_settings( State ) ->
 
 run_new_dealer_for_instrument( State, Instrument ) ->
 	ExpirationDatetime = datetime:nearest_expiration_datetime( get_dates_settings( State ) ),
-	DealerPid = spawn( bn_dealer, dealer, [Instrument, ExpirationDatetime] ),
+	DealerPid = spawn( bn_dealer, dealer, [Instrument, ExpirationDatetime, get_dates_settings( State )] ),
 	NewState = set_dealer_info( State, Instrument, { DealerPid, ExpirationDatetime } ),
 	{ NewState, DealerPid }.
 

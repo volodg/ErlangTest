@@ -7,12 +7,12 @@
 %% API
 -export([start_link/0,
         notify/1,
-		subscribe/1,
-		unsubscribe/1]).
+		subscribe/0,
+		unsubscribe/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3]).
+         terminate/2, code_change/3,sync_subscribe/0]).
 
 -define(SERVER, ?MODULE).
 
@@ -33,14 +33,16 @@ start_link() ->
 notify(Msg) ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {notify_all, Msg}).
 
-%TODO think again
-subscribe(_Pid) ->
-	gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, _Pid}).
-	%gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe ).
+subscribe() ->
+	gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, self()}).
+
+sync_subscribe() ->
+	io:fwrite( "sync_subscribe: ~p~n", [self()] ),
+	gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe).
 
 %TODO remove Pid argument
-unsubscribe(Pid) ->
-	gen_server:cast( { ?SERVER, ?SRV_NODE }, {unsubscribe, Pid}).
+unsubscribe() ->
+	gen_server:cast( { ?SERVER, ?SRV_NODE }, {unsubscribe, self()}).
 
 %TODO do notification via "gen_server:call" !!!
 
@@ -66,7 +68,6 @@ init([]) ->
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
 handle_cast( { notify_all, Msg }, State ) ->
-	io:fwrite( "notify_all with report: ~p~n", [ State ] ),
 	lists:foreach(fun(H) -> H ! Msg end, State),
 	{noreply, State};
 
@@ -87,7 +88,8 @@ handle_cast({unsubscribe, Pid}, State) ->
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
 handle_call(subscribe, From, State) ->
-	NewState = lists:append(State, [From]),
+	{Pid,_Tag} = From,
+	NewState = lists:append(State, [Pid]),
 	{reply, ok, NewState};
 
 handle_call(_Request, _From, State) ->

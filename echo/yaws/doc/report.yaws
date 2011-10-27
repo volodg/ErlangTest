@@ -18,7 +18,7 @@
 			{discard, YawsPid} ->
 				yaws_api:stream_process_end(Sock, YawsPid);
 			{ok, YawsPid} ->
-				bn_report:subscribe( self() ),
+				bn_report:subscribe(),
 				rec_loop(Sock, YawsPid);
 			Other ->
 				{ html, "error" }

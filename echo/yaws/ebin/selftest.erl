@@ -109,7 +109,7 @@ test_sum_of_deals_on_instument( Instrument ) ->
 	valid_dealer_response( bn_server:deal( Deal3 ) ),
 	valid_dealer_response( bn_server:deal( Deal4 ) ),
 
-	bn_report:subscribe( self() ),
+	bn_report:subscribe(),
 
 	NowDatetime = datetime:now_datetime(),
 	DatetimeDuration = datetime:add_second_to_datetime( ?REPORT_DURATION_SEC, NowDatetime ),

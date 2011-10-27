@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>echo/yaws/ebin/bn_common.erl</string>
+	<string>echo/yaws/ebin/bn_server.erl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -240,35 +240,7 @@
 				<key>column</key>
 				<integer>15</integer>
 				<key>line</key>
-				<integer>37</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>echo/yaws/doc/deal.yaws</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>echo/yaws/doc/report.yaws</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>36</integer>
-				<key>line</key>
-				<integer>31</integer>
+				<integer>19</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
@@ -279,16 +251,60 @@
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>30</integer>
+				<integer>9</integer>
 				<key>line</key>
-				<integer>31</integer>
+				<integer>19</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
-				<integer>42</integer>
+				<integer>18</integer>
 				<key>line</key>
-				<integer>31</integer>
+				<integer>19</integer>
+			</dict>
+		</dict>
+		<key>echo/yaws/doc/deal.yaws</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>19</integer>
+				<key>line</key>
+				<integer>11</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>3</integer>
+		</dict>
+		<key>echo/yaws/doc/report.yaws</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>34</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>28</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>34</integer>
 			</dict>
 		</dict>
 		<key>echo/yaws/doc/test/random_deal.yaws</key>
@@ -296,43 +312,57 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>14</integer>
+				<integer>21</integer>
 				<key>line</key>
-				<integer>9</integer>
+				<integer>4</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
+		<key>echo/yaws/ebin/benchmark.erl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>61</integer>
+				<key>line</key>
+				<integer>13</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>2</integer>
+		</dict>
 		<key>echo/yaws/ebin/bn_common.erl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>44</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>24</integer>
+				<integer>40</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>11</integer>
+			<integer>17</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>33</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>24</integer>
+				<integer>38</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
-				<integer>67</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>24</integer>
+				<integer>40</integer>
 			</dict>
 		</dict>
 		<key>echo/yaws/ebin/bn_config.hrl</key>
@@ -342,7 +372,7 @@
 				<key>column</key>
 				<integer>19</integer>
 				<key>line</key>
-				<integer>5</integer>
+				<integer>6</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
@@ -355,14 +385,14 @@
 				<key>column</key>
 				<integer>8</integer>
 				<key>line</key>
-				<integer>5</integer>
+				<integer>6</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
 				<integer>27</integer>
 				<key>line</key>
-				<integer>5</integer>
+				<integer>6</integer>
 			</dict>
 		</dict>
 		<key>echo/yaws/ebin/bn_dealer.erl</key>
@@ -370,29 +400,29 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>6</integer>
+				<integer>2</integer>
 				<key>line</key>
-				<integer>84</integer>
+				<integer>105</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>41</integer>
+			<integer>60</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
 				<integer>2</integer>
 				<key>line</key>
-				<integer>84</integer>
+				<integer>105</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
 				<integer>6</integer>
 				<key>line</key>
-				<integer>84</integer>
+				<integer>105</integer>
 			</dict>
 		</dict>
 		<key>echo/yaws/ebin/bn_report.erl</key>
@@ -400,59 +430,43 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>6</integer>
+				<integer>58</integer>
 				<key>line</key>
-				<integer>64</integer>
+				<integer>37</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>47</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>2</integer>
-				<key>line</key>
-				<integer>64</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>6</integer>
-				<key>line</key>
-				<integer>64</integer>
-			</dict>
+			<integer>14</integer>
 		</dict>
 		<key>echo/yaws/ebin/bn_server.erl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>6</integer>
+				<integer>17</integer>
 				<key>line</key>
-				<integer>140</integer>
+				<integer>150</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>114</integer>
+			<integer>123</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>2</integer>
+				<integer>13</integer>
 				<key>line</key>
-				<integer>140</integer>
+				<integer>150</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
-				<integer>6</integer>
+				<integer>18</integer>
 				<key>line</key>
-				<integer>140</integer>
+				<integer>150</integer>
 			</dict>
 		</dict>
 		<key>echo/yaws/ebin/datetime.erl</key>
@@ -462,28 +476,42 @@
 				<key>column</key>
 				<integer>5</integer>
 				<key>line</key>
-				<integer>40</integer>
+				<integer>41</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>41</integer>
+			<integer>9</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>1</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>40</integer>
+				<integer>41</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
-				<integer>5</integer>
+				<integer>12</integer>
 				<key>line</key>
-				<integer>40</integer>
+				<integer>41</integer>
 			</dict>
+		</dict>
+		<key>echo/yaws/ebin/selftest.erl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>100</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>81</integer>
 		</dict>
 		<key>testStream/Dependencies/JFFLibrary/lib/JFFAsyncOperations/JFFAsyncOperationsPredefinedBlocks.m</key>
 		<dict>
@@ -522,12 +550,14 @@
 		<string>echo/REAME</string>
 		<string>echo/yaws/ebin/bn_dealer.erl</string>
 		<string>echo/yaws/ebin/bn_server.erl</string>
+		<string>echo/yaws/ebin/selftest.erl</string>
 		<string>echo/yaws/doc/deal.yaws</string>
 		<string>echo/yaws/doc/test/random_deal.yaws</string>
 		<string>echo/yaws/ebin/bn_common.erl</string>
 		<string>echo/yaws/doc/report.yaws</string>
 		<string>echo/yaws/ebin/bn_config.hrl</string>
 		<string>echo/TODO</string>
+		<string>echo/yaws/ebin/benchmark.erl</string>
 		<string>echo/yaws/ebin/datetime.erl</string>
 		<string>testStream/Dependencies/JFFLibrary/lib/JFFAsyncOperations/JFFAsyncOperationsPredefinedBlocks.m</string>
 		<string>echo/yaws/ebin/bn_report.erl</string>

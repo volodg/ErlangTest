@@ -32,6 +32,8 @@ start() ->
 			Other
 	end.
 
+%TODO add stop method
+
 %%--------------------------------------------------------------------
 %% Function: notify(Msg) -> ok
 %% Description: Creates a bank account for the person with name Name

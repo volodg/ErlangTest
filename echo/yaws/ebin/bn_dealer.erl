@@ -4,45 +4,26 @@
 
 -include("bn_config.hrl").
 
-% log_deal( { DealInstrument, DealTime, DealPrice, DealAmount } ) ->
-% 	io:fwrite( "In Instrument: ~p~n", [DealInstrument] ),
-% 	io:fwrite( "In Time: ~p~n", [DealTime] ),
-% 	io:fwrite( "In Price: ~p~n", [DealPrice] ),
-% 	io:fwrite( "In Amount: ~p~n", [DealAmount] ),
-% 	io:fwrite( "------------------------~n" ).
-% 
-% log_deal_rep( { _NewOpenTime, NewOpenPrice, NewClosePrice, NewMinPrice, NewMaxPrice, NewTotalAmount } ) ->
-% 	io:fwrite( "Out NewOpenPrice: ~p~n", [NewOpenPrice] ),
-% 	io:fwrite( "Out NewClosePrice: ~p~n", [NewClosePrice] ),
-% 	io:fwrite( "Out NewMinPrice: ~p~n", [NewMinPrice] ),
-% 	io:fwrite( "Out NewMaxPrice: ~p~n", [NewMaxPrice] ),
-% 	io:fwrite( "Out NewTotalAmount: ~p~n", [NewTotalAmount] ),
-% 	io:fwrite( "------------------------~n" ).
-
 process_deal( State, From, { _DealInstrument, _DealTime, DealPrice, DealAmount } ) ->
-	{ _OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = State,
+	{ OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
 
-	% log_deal( { DealInstrument, DealTime, DealPrice, DealAmount } ),
-
-	NewState = case TotalAmount of
+	NewReportData = case TotalAmount of
 		0 ->
 			%first deal here on instrument
-			{ _OpenTime, DealPrice, DealPrice, DealPrice, DealPrice, DealAmount };
+			{ OpenTime, DealPrice, DealPrice, DealPrice, DealPrice, DealAmount };
 		_Other ->
 			RecTotalAmount = TotalAmount + DealAmount,
 			RecClosePrice = DealPrice,
 			RecMinPrice = min( MinPrice, DealPrice ),
 			RecMaxPrice = max( MaxPrice, DealPrice ),
-			{ _OpenTime, OpenPrice, RecClosePrice, RecMinPrice, RecMaxPrice, RecTotalAmount }
+			{ OpenTime, OpenPrice, RecClosePrice, RecMinPrice, RecMaxPrice, RecTotalAmount }
 	end,
 	From ! { reply, self(), "Good deal" },
 
-	% log_deal_rep( NewState ),
-
-	NewState.
+	set_report_data( NewReportData, State ).
 
 send_report( DealerInstrument, State ) ->
-	{ OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } = State,
+	{ OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
 	case TotalAmount of
 		TotalAmount when TotalAmount > 0 ->
 			bn_report:notify( { report, DealerInstrument, OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } );
@@ -51,8 +32,9 @@ send_report( DealerInstrument, State ) ->
 	end,
 	exit( normal ).
 
-loop( DealerInstrument, { StartDatetime, EndDatetime, DelaySeconds }, State ) ->
-	DealerDateRange = { StartDatetime, EndDatetime, DelaySeconds },
+loop( State, DealerInstrument ) ->
+	DealerDateRange = get_datetime_setting( State ),
+	{ _StartDatetime, EndDatetime, _DelaySeconds } = DealerDateRange,
 	receive
 		{ From, Deal } ->
 			Expared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), EndDatetime ),
@@ -70,18 +52,19 @@ loop( DealerInstrument, { StartDatetime, EndDatetime, DelaySeconds }, State ) ->
 							State
 					end,
 
-					loop( DealerInstrument, DealerDateRange, NewState )
+					loop( NewState, DealerInstrument )
 			end;
 		send_report ->
 			send_report( DealerInstrument, State );
 		Other ->
 			io:fwrite( "Unhandled msg in dealer (should not happen): ~p~n", [Other] ),
-			loop( DealerInstrument, DealerDateRange, State )
+			loop( State, DealerInstrument )
 	end.
 
-dealer( InstrumentName, { StartDatetime, EndDatetime, DelaySeconds } ) ->
+dealer( InstrumentName, DatetimeSettings ) ->
 	%init here timer, state and etc
 
+	{ StartDatetime, EndDatetime, _DelaySeconds } = DatetimeSettings,
 	%TODO if datetime:now_datetime() > ExpirationDatetime ????
 	Delay = datetime:datetime_difference_in_seconds( datetime:now_datetime(), EndDatetime ) * 1000,
 	timer:send_after( Delay, send_report ),
@@ -92,5 +75,20 @@ dealer( InstrumentName, { StartDatetime, EndDatetime, DelaySeconds } ) ->
 	MinPrice = 0,
 	MaxPrice = 0,
 	OpenDatetime = StartDatetime,
-	InitState = { OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
-	loop( InstrumentName, { StartDatetime, EndDatetime, DelaySeconds }, InitState ).
+	InitialReportData = { OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
+	State = set_report_data( InitialReportData, dict:new() ),
+
+	StateWithDatetime = dict:store( datetime_settings, DatetimeSettings, State ),
+
+	loop( StateWithDatetime, InstrumentName ).
+
+get_datetime_setting( State ) ->
+	{ ok, DatetimeSetting } = dict:find( datetime_settings, State ),
+	DatetimeSetting.
+
+get_report_data( State ) ->
+	{ ok, ReportData } = dict:find( report_data, State ),
+	ReportData.
+
+set_report_data( NewReportData, State ) ->
+	dict:store( report_data, NewReportData, State ).

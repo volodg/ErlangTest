@@ -58,7 +58,7 @@ unsubscribe() ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init([]) ->
-	%TODO send live packages
+	process_flag(trap_exit, true),
 	{ok, []}.
 
 %%--------------------------------------------------------------------
@@ -72,7 +72,7 @@ handle_cast( { notify_all, Msg }, State ) ->
 	{noreply, State};
 
 handle_cast({subscribe, Pid}, State) ->
-	NewState = lists:append(State, [Pid]),
+	NewState = subscribe_pid(State, Pid),
 	{noreply, NewState};
 
 handle_cast({unsubscribe, Pid}, State) ->
@@ -89,7 +89,7 @@ handle_cast({unsubscribe, Pid}, State) ->
 %%--------------------------------------------------------------------
 handle_call(subscribe, From, State) ->
 	{Pid,_Tag} = From,
-	NewState = lists:append(State, [Pid]),
+	NewState = subscribe_pid(State, Pid),
 	{reply, ok, NewState};
 
 handle_call(_Request, _From, State) ->
@@ -101,8 +101,12 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
+handle_info({'EXIT',Pid,_ExitType}, State) ->
+	NewState = lists:delete(Pid, State),
+	{noreply, NewState};
+
 handle_info(_Info, State) ->
-  {noreply, State}.
+	{noreply, State}.
 
 %%--------------------------------------------------------------------
 %% Function: terminate(Reason, State) -> void()
@@ -125,3 +129,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% Internal functions
 %%--------------------------------------------------------------------
+
+subscribe_pid(State, Pid) ->
+	link( Pid ),
+	lists:append(State, [Pid]).

@@ -156,8 +156,7 @@ run_new_dealer_for_instrument( State, Instrument ) ->
 process_get_dealer_for_instrument( State, { Instrument, _Time, _Price, _Amount } ) ->
 	{ NewState, InstrumentDealerPid } = case find_dealer_info( State, Instrument ) of
 		{ ok, { DealerPid, ExpirationDate } } ->
-			NearestNextStartDate = datetime:nearest_expiration_datetime( get_dates_settings( State ) ),
-			ExpirationDateExpared = datetime:datetime_earlier_than_datetime( ExpirationDate, NearestNextStartDate ),
+			ExpirationDateExpared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), ExpirationDate ),
 		    case ExpirationDateExpared of
 				true ->
 					run_new_dealer_for_instrument( State, Instrument );
@@ -171,8 +170,6 @@ process_get_dealer_for_instrument( State, { Instrument, _Time, _Price, _Amount }
 
 process_get_dealer( State, Deal ) ->
 	ValidDealArgs = bn_common:validate_deal_args( ?INSTRUMENTS, get_dates_settings( State ), Deal ),
-	%{ _Instrument, DealDatetime, _Price, _Amount } = Deal,
-	%ValidDealArgs = datetime:valid_datetime( DealDatetime ),
 
 	case ValidDealArgs of
 		true ->

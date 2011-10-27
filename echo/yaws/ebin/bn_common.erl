@@ -54,15 +54,6 @@ validate_deal_args( Instruments, DatesSettings, Deal ) ->
 			{ error, "Invalid Amount, It should be larger then zero and integer" }
 	end.
 
-%TODO remove
-priority_receive( Term, Otherwise ) ->
-	receive
-		Term ->
-			Term
-	    after 0 ->
-	    	Otherwise()
-	end.
-
 current_datetime() ->
 	datetime:now_datetime().
 

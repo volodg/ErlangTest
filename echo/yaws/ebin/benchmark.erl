@@ -4,7 +4,6 @@
 
 -include("bn_config.hrl").
 
-%TODO !!! kill childs
 init() ->
 	Deal = bn_common:random_deal(),
 	{ Instrument, Datetime, Price, _Amount } = Deal,
@@ -20,15 +19,7 @@ init() ->
 
 	{A1,A2,A3} = now(),
 	random:seed(A1, A2, A3),
-	% case bn_server:start() of
-	% 	ok ->
-	% 		%10 000
-			start_traders(20000, ?INSTRUMENTS, []).
-	% 		bn_server:start(); %stop server
-	% 	Other ->
-	% 		io:fwrite( "Starting Server error: ~p~n", [Other] ),
-	% 		Other
-	% end.
+	start_traders(20000, ?INSTRUMENTS, []).
 
 run() ->
 	spawn_link( benchmark, init, []).

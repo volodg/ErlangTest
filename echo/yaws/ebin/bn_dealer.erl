@@ -83,6 +83,10 @@ dealer( InstrumentName, DatetimeSettings ) ->
 
 	loop( InitialState ).
 
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
+
 get_dealer_instrument( State ) ->
 	{ ok, DealerInstrument } = dict:find( dealer_instrument, State ),
 	DealerInstrument.

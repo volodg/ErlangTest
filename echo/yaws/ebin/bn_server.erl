@@ -147,16 +147,20 @@ get_dates_settings( State ) ->
 	DateSettings.
 
 run_new_dealer_for_instrument( State, Instrument ) ->
-	ExpirationDatetime = datetime:nearest_expiration_datetime( get_dates_settings( State ) ),
-	DealerPid = spawn( bn_dealer, dealer, [Instrument, ExpirationDatetime, get_dates_settings( State )] ),
-	NewState = set_dealer_info( State, Instrument, { DealerPid, ExpirationDatetime } ),
+	DateSettings = get_dates_settings( State ),
+	{ _StartDatetime, _EndDatetime, Duration } = DateSettings,
+	EndDealerDatetime = datetime:nearest_expiration_datetime( DateSettings ),
+	StartDealerDatetime = datetime:add_second_to_datetime( -?REPORT_DURATION_SEC, EndDealerDatetime ),
+	DealerDateRange = { StartDealerDatetime, EndDealerDatetime, Duration },
+	DealerPid = spawn( bn_dealer, dealer, [Instrument, DealerDateRange] ),
+	NewState = set_dealer_info( State, Instrument, { DealerPid, EndDealerDatetime } ),
 	{ NewState, DealerPid }.
 
 %validate arguments before calling this method
 process_get_dealer_for_instrument( State, { Instrument, _Time, _Price, _Amount } ) ->
 	{ NewState, InstrumentDealerPid } = case find_dealer_info( State, Instrument ) of
-		{ ok, { DealerPid, ExpirationDate } } ->
-			ExpirationDateExpared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), ExpirationDate ),
+		{ ok, { DealerPid, EndDealerDatetime } } ->
+			ExpirationDateExpared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), EndDealerDatetime ),
 		    case ExpirationDateExpared of
 				true ->
 					run_new_dealer_for_instrument( State, Instrument );

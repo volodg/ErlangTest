@@ -51,23 +51,16 @@ send_report( DealerInstrument, State ) ->
 	end,
 	exit( normal ).
 
-loop( DealerInstrument, ExpirationDatetime, State ) ->
+loop( DealerInstrument, { StartDatetime, EndDatetime, DelaySeconds }, State ) ->
+	DealerDateRange = { StartDatetime, EndDatetime, DelaySeconds },
 	receive
 		{ From, Deal } ->
-			Expared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), ExpirationDatetime ),
+			Expared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), EndDatetime ),
 			case Expared of
 				true ->
 					send_report( DealerInstrument, State );
-					%TODO set new ExpirationDatetime and process anywhere for performane isseu
 				false ->
-					DurationInSeconds = ?REPORT_DURATION_SEC,
-					StartDatetime = datetime:add_second_to_datetime( -DurationInSeconds, ExpirationDatetime ),
-					DatesSettings = { StartDatetime, ExpirationDatetime, DurationInSeconds },
-
-					ValidDealArgs = bn_common:validate_deal_args( [ DealerInstrument ], DatesSettings, Deal ),
-					% { _DealInstrument, DealTime, _DealPrice, _DealAmount } = Deal,
-					% ValidDealArgs = datetime:datetime_earlier_than_datetime( DealTime, ExpirationDatetime ),
-					% ValidDealArgs = true,
+					ValidDealArgs = bn_common:validate_deal_args( [ DealerInstrument ], DealerDateRange, Deal ),
 
 					NewState = case ValidDealArgs of
 						true ->
@@ -77,20 +70,20 @@ loop( DealerInstrument, ExpirationDatetime, State ) ->
 							State
 					end,
 
-					loop( DealerInstrument, ExpirationDatetime, NewState )
+					loop( DealerInstrument, DealerDateRange, NewState )
 			end;
 		send_report ->
 			send_report( DealerInstrument, State );
 		Other ->
 			io:fwrite( "Unhandled msg in dealer (should not happen): ~p~n", [Other] ),
-			loop( DealerInstrument, ExpirationDatetime, State )
+			loop( DealerInstrument, DealerDateRange, State )
 	end.
 
-dealer( InstrumentName, ExpirationDatetime ) ->
+dealer( InstrumentName, { StartDatetime, EndDatetime, DelaySeconds } ) ->
 	%init here timer, state and etc
 
 	%TODO if datetime:now_datetime() > ExpirationDatetime ????
-	Delay = datetime:datetime_difference_in_seconds( datetime:now_datetime(), ExpirationDatetime ) * 1000,
+	Delay = datetime:datetime_difference_in_seconds( datetime:now_datetime(), EndDatetime ) * 1000,
 	timer:send_after( Delay, send_report ),
 
 	TotalAmount = 0,
@@ -98,6 +91,6 @@ dealer( InstrumentName, ExpirationDatetime ) ->
 	ClosePrice = 0,
 	MinPrice = 0,
 	MaxPrice = 0,
-	OpenDatetime = datetime:add_second_to_datetime( -?REPORT_DURATION_SEC, ExpirationDatetime ),
+	OpenDatetime = StartDatetime,
 	InitState = { OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
-	loop( InstrumentName, ExpirationDatetime, InitState ).
+	loop( InstrumentName, { StartDatetime, EndDatetime, DelaySeconds }, InitState ).

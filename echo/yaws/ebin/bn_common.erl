@@ -1,6 +1,6 @@
 -module(bn_common).
 
--export([validate_deal_args/3,priority_receive/2,random_deal/0]).
+-export([validate_deal_args/3,random_deal/0]).
 
 valid_price( Price ) ->
 	case is_number( Price ) of

@@ -8,11 +8,12 @@
 -export([start_link/0,
         notify/1,
 		subscribe/0,
-		unsubscribe/0]).
+		unsubscribe/0,
+		sync_subscribe/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3,sync_subscribe/0]).
+         terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
 
@@ -39,11 +40,10 @@ subscribe() ->
 sync_subscribe() ->
 	gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe).
 
-%TODO remove Pid argument
 unsubscribe() ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {unsubscribe, self()}).
 
-%TODO do notification via "gen_server:call" !!!
+%TODO do notification via "gen_server:call" !!! ???
 
 %%====================================================================
 %% gen_server callbacks

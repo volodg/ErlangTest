@@ -44,14 +44,11 @@ deal( Deal ) ->
 		{ error, ValidationErrorDescr } ->
 			{ error, ValidationErrorDescr };
 		{ dealer_pid, DealerPid } ->
-			DealerPid ! { self(), Deal },
-			receive
-				{ reply, DealerPid, Msg } ->
-					{ ok, Msg };
-				{ error, DealerPid, ErrorDescr } ->
-					{ error, ErrorDescr }
-			after 500 ->
-				timeout
+			case catch( gen_server:call( DealerPid, {deal, Deal}) ) of
+				{normal, _Msg} ->
+					{ error, "Dealer already unavailable" };
+				Other ->
+					Other
 			end
 	end.
 
@@ -154,7 +151,7 @@ run_new_dealer_for_instrument( State, Instrument ) ->
 	EndDealerDatetime = datetime:nearest_expiration_datetime( DateSettings ),
 	StartDealerDatetime = datetime:add_second_to_datetime( -?REPORT_DURATION_SEC, EndDealerDatetime ),
 	DealerDateRange = { StartDealerDatetime, EndDealerDatetime, Duration },
-	DealerPid = spawn( bn_dealer, dealer, [Instrument, DealerDateRange] ),
+	DealerPid = bn_dealer:start_link( Instrument, DealerDateRange ),
 	NewState = set_dealer_info( State, Instrument, { DealerPid, EndDealerDatetime } ),
 	{ NewState, DealerPid }.
 

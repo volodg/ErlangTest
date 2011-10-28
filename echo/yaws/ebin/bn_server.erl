@@ -64,6 +64,8 @@ deal( Deal ) ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init([]) ->
+	process_flag(trap_exit, true),
+
 	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
 
 	bn_report:start_link(),
@@ -104,6 +106,14 @@ handle_cast(_Msg, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
+handle_info({'EXIT',_Pid,normall}, State) ->
+	%ignore this 'EXIT'
+	{noreply, State};
+
+handle_info({'EXIT',Pid,_Reason}, State) ->
+	NewState = remove_dealer_pid( Pid, State ),
+	{noreply, NewState};
+
 handle_info(_Info, State) ->
 	{noreply, State}.
 
@@ -180,6 +190,18 @@ process_get_dealer( State, Deal ) ->
 		{ error, ValidationErrorDescr } ->
 			{reply, { error, ValidationErrorDescr }, State}
 	end.
+
+remove_dealer_pid( Pid, State ) ->
+	{ ok, DealerPidAndExpDateByInstrument } = dict:find( dealer_info_by_instrument, State ),
+	NewDealerPidAndExpDateByInstrument = dict:filter(fun(_Key, { DealerPid, _ExpDate }) ->
+		 case DealerPid of
+			Pid ->
+				false;
+			_Other ->
+				true
+		 end
+		end, DealerPidAndExpDateByInstrument),
+	dict:store( dealer_info_by_instrument, NewDealerPidAndExpDateByInstrument, State ).
 
 %returns { ok, { DealerPid, ExpirationDate } } or error
 find_dealer_info( State, Instrument ) ->

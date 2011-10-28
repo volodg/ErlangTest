@@ -17,4 +17,9 @@
 		total_amount
 	}).
 
-%-record(deal_rec, { client_pid, { instrument, time, price, amount } } ).
+-record(deal, {
+		instrument,
+		datetime,
+		price,
+		amount
+	}).

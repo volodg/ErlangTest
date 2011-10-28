@@ -178,18 +178,19 @@ run_new_dealer_for_instrument( State, Instrument ) ->
 	{ NewState, DealerPid }.
 
 %validate arguments before calling this method
-process_get_dealer_for_instrument( State, { Instrument, _Time, _Price, _Amount } ) ->
-	{ NewState, InstrumentDealerPid } = case find_dealer_info( State, Instrument ) of
+process_get_dealer_for_instrument( State, Deal ) ->
+	FindResult = find_dealer_info( State, Deal#deal.instrument ),
+	{ NewState, InstrumentDealerPid } = case FindResult of
 		{ ok, { DealerPid, EndDealerDatetime } } ->
 			ExpirationDateExpared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), EndDealerDatetime ),
 		    case ExpirationDateExpared of
 				true ->
-					run_new_dealer_for_instrument( State, Instrument );
+					run_new_dealer_for_instrument( State, Deal#deal.instrument );
 				false ->
 					{ State, DealerPid }
 			end;
 		error ->
-			run_new_dealer_for_instrument( State, Instrument )
+			run_new_dealer_for_instrument( State, Deal#deal.instrument )
 	end,
 	{ reply, { dealer_pid, InstrumentDealerPid }, NewState }.
 

@@ -2,6 +2,8 @@
 
 -export([validate_deal_args/3,random_deal/0]).
 
+-include("bn_config.hrl").
+
 valid_price( Price ) ->
 	case is_number( Price ) of
 		true when Price > 0 ->
@@ -30,16 +32,15 @@ valid_deal_datetime( Datetime, DatesSettings ) ->
 					{ error, "Invalid date: out of range deal dates" }
 			end;
 		false ->
-			{ error, "Invalid date format" }
+			{ error, "Invalid datetime format" }
 	end.
 
 %returns true or { false, ValidateErrorDescription }
 validate_deal_args( Instruments, DatesSettings, Deal ) ->
-	{ Instrument, Time, Price, Amount } = Deal,
-	ValidDatetime   = valid_deal_datetime( Time, DatesSettings ),
-	ValidInstrument = sets:is_element( Instrument, sets:from_list( Instruments ) ),
-	ValidPrice      = valid_price( Price ),
-	ValidAmount     = valid_amount( Amount ),
+	ValidDatetime   = valid_deal_datetime( Deal#deal.datetime, DatesSettings ),
+	ValidInstrument = sets:is_element( Deal#deal.instrument, sets:from_list( Instruments ) ),
+	ValidPrice      = valid_price( Deal#deal.price ),
+	ValidAmount     = valid_amount( Deal#deal.amount ),
 
 	case { ValidDatetime, ValidInstrument, ValidPrice, ValidAmount } of
 		{ true, true, true, true } ->
@@ -68,9 +69,7 @@ random_amount() ->
 	random:uniform(1000).
 
 random_deal() ->
-	Datetime = current_datetime(),
-	Instrument = random_instrument(),
-	Price = random_price(),
-	Amount = random_amount(),
-
-	{ Instrument, Datetime, Price, Amount }.
+	#deal{instrument=random_instrument(),
+	 		datetime=current_datetime(),
+			price   =random_price(),
+			amount  =random_amount()}.

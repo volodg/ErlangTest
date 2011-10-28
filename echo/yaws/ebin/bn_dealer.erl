@@ -145,18 +145,18 @@ get_report_data( State ) ->
 set_report_data( ReportData, State ) ->
 	dict:store( report_data, ReportData, State ).
 
-process_deal( State, { _DealInstrument, _DealTime, DealPrice, DealAmount } ) ->
+process_deal( State, Deal ) ->
 	{ OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
 
 	NewReportData = case TotalAmount of
 		0 ->
 			%first deal here on instrument
-			{ OpenTime, DealPrice, DealPrice, DealPrice, DealPrice, DealAmount };
+			{ OpenTime, Deal#deal.price, Deal#deal.price, Deal#deal.price, Deal#deal.price, Deal#deal.amount };
 		_Other ->
-			RecTotalAmount = TotalAmount + DealAmount,
-			RecClosePrice = DealPrice,
-			RecMinPrice = min( MinPrice, DealPrice ),
-			RecMaxPrice = max( MaxPrice, DealPrice ),
+			RecTotalAmount = TotalAmount + Deal#deal.amount,
+			RecClosePrice = Deal#deal.price,
+			RecMinPrice = min( MinPrice, Deal#deal.price ),
+			RecMaxPrice = max( MaxPrice, Deal#deal.price ),
 			{ OpenTime, OpenPrice, RecClosePrice, RecMinPrice, RecMaxPrice, RecTotalAmount }
 	end,
 

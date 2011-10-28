@@ -5,10 +5,10 @@
 -include("bn_config.hrl").
 
 init() ->
-	Deal = bn_common:random_deal(),
-	{ Instrument, Datetime, Price, _Amount } = Deal,
 	bn_report:sync_subscribe(),
-	DealRes = bn_server:deal( { Instrument, Datetime, Price, 1 } ),
+	Deal = bn_common:random_deal(),
+	NewDeal = #deal{instrument=Deal#deal.instrument, datetime=Deal#deal.datetime, price=Deal#deal.price, amount=1},
+	DealRes = bn_server:deal( NewDeal ),
 	io:fwrite( "try receive report from deal ~p self:~p ~n", [DealRes,self()] ),
 	receive
 		#report{} ->
@@ -49,8 +49,8 @@ trader() ->
 	{A1,A2,A3} = now(),
 	random:seed(A1, A2, A3),
 	Deal = bn_common:random_deal(),
-	{ Instrument, Datetime, Price, _Amount } = Deal,
-	Response = bn_server:deal( { Instrument, Datetime, Price, 1 } ),
+	NewDeal = #deal{instrument=Deal#deal.instrument, datetime=Deal#deal.datetime, price=Deal#deal.price, amount=1},
+	Response = bn_server:deal( NewDeal ),
 	case Response of
 		{ ok, _Resp } ->
 			true;

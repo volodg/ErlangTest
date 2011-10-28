@@ -166,7 +166,8 @@ send_report( State ) ->
 	{ OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
 	case TotalAmount of
 		TotalAmount when TotalAmount > 0 ->
-			bn_report:notify( { report, get_dealer_instrument( State ), OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } );
+			Report = { get_dealer_instrument( State ), OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
+			bn_report:notify( { report, Report } );
 		_Other ->
 			ignore
 	end.

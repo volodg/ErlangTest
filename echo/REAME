@@ -9,6 +9,8 @@ SERVER
 3. bn_server:start().
 4. bn_server:stop().
 
+Compile all - lc([benchmark,bn_common,bn_dealer,bn_report,bn_server,datetime,selftest]).
+
 ///////////////////////////////////////////////
 
 1. yaws

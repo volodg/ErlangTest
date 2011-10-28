@@ -4,6 +4,7 @@
 
 %% API
 -export([start/0,
+		stop/0,
         deal/1]).
 
 %% gen_server callbacks
@@ -22,14 +23,14 @@
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start() ->
-	case gen_server:start_link({local, ?SERVER}, ?MODULE, [], []) of
-		{ok,_Pid} ->
-			ok;
-		{error,{already_started,Pid}} ->
-			exit(Pid, kill),
-			{error,{already_started,Pid}};
-		Other ->
-			Other
+	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
+stop() ->
+	case whereis(?SERVER) of
+		undefined ->
+			io:fwrite( "Server not runned~n" );
+		Pid ->
+			exit( Pid, normal )
 	end.
 
 %ETODO add stop method

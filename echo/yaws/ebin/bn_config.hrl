@@ -7,4 +7,14 @@
 
 -define(REPORT_DURATION_SEC, 5).
 
+-record(report, {
+		instrument,
+		open_time,
+		open_price,
+		close_price,
+		min_proce,
+		max_price,
+		total_amount
+	}).
+
 %-record(deal_rec, { client_pid, { instrument, time, price, amount } } ).

@@ -11,7 +11,7 @@ init() ->
 	DealRes = bn_server:deal( { Instrument, Datetime, Price, 1 } ),
 	io:fwrite( "try receive report from deal ~p self:~p ~n", [DealRes,self()] ),
 	receive
-		{ report, _Report } ->
+		#report{} ->
 			true
 	end,
 	io:fwrite( "Start all after report~n", [] ),
@@ -31,9 +31,9 @@ receive_report( [], AmountAsDealCount, Children ) ->
 receive_report( Instruments, AmountAsDealCount, Children ) ->
 	[ HeadInstrument | Tail ] = Instruments,
 	AddAmount = receive
-		{ report, { HeadInstrument, _OpenDatetime, _OpenPrice, _ClosePrice, _MinPrice, _MaxPrice, TotalAmount } } ->
-			Report = { HeadInstrument, _OpenDatetime, _OpenPrice, _ClosePrice, _MinPrice, _MaxPrice, TotalAmount },
-			io:fwrite( "Report received: ~p~n", [ Report ] ),
+		#report{instrument=HeadInstrument,
+				total_amount=TotalAmount} ->
+			io:fwrite( "Report received for Instrument: ~p~n", [ HeadInstrument ] ),
 			TotalAmount
 	end,
 	receive_report( Tail, AmountAsDealCount + AddAmount, Children ).

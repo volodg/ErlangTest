@@ -80,13 +80,18 @@ test_invalid_deal_amount() ->
 
 receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount, Delay ) ->
 	receive
-		{ report, { Instrument, _OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } } ->
+		#report{instrument=Instrument,
+				open_price=OpenPrice,
+				close_price=ClosePrice,
+				min_proce=MinPrice,
+				max_price=MaxPrice,
+				total_amount=TotalAmount} ->
 			io:fwrite( "Report received for Instrument: ~p~n", [ Instrument ] ),
 			true;
-		{ report, { _OtherInstrument, _OtherOpenDatetime, _OtherOpenPrice, _OtherClosePrice, _OtherMinPrice, _OtherMaxPrice, _OtherTotalAmount } } ->
+		#report{} ->
 			receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount, Delay )
 		after Delay ->
-			throw( { error, "Have no valid report for instrument", [Instrument] } )
+			throw( { error, "Have no valid report for instrument", Instrument } )
 	end.
 
 test_sum_of_deals_on_instument( Instrument ) ->

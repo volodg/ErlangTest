@@ -28,10 +28,9 @@
 	rec_loop( Socket, YawsPid ) ->
 		receive
 			{ report, DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } ->
-				{ Date, Time } = OpenDatetime,
-				ReportFormat = "Instr: ~p OpenDatetime: {~p,~p} OpenPrice: ~p ClosePrice: ~p MinPrice: ~p MaxPrice: ~p TotalAmount: ~p~n",
+				ReportFormat = "Instr: ~p OpenDatetime: ~p OpenPrice: ~p ClosePrice: ~p MinPrice: ~p MaxPrice: ~p TotalAmount: ~p~n",
 				SendString = io_lib:format( ReportFormat,
-					[ DealerInstrument, Date, Time, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount ] ),
+					[ DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount ] ),
 				yaws_api:stream_process_deliver_chunk(Socket, SendString),
 				rec_loop( Socket, YawsPid );
 			finish ->

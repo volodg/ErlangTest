@@ -21,16 +21,8 @@ CFLAGS=-O0 ./configure --prefix=/usr/share/erlang --enable-threads --enable-darw
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-1. Restart report if fail
-
 2. Document all
 
 3. Test different issues, errors and timeouts
 
-4. Precess crashes in Supervisor
-
-5. remove Pid when exit or crash from DealerPidAndExpDateByInstrument
-
-6. Send empty reports also ?!
-
-7. Fix all TODO
+7. Fix all ETODO

@@ -32,7 +32,7 @@ start() ->
 			Other
 	end.
 
-%TODO add stop method
+%ETODO add stop method
 
 %%--------------------------------------------------------------------
 %% Function: notify(Msg) -> ok
@@ -157,7 +157,7 @@ start_datetime() ->
 end_datetime( StartDatetime ) ->
 	DuratonInSeconds = ?REPORT_DURATION_SEC,
 	io:fwrite( "DuratonInSeconds: ~p~n", [DuratonInSeconds] ),
-	%TODO change 10000
+	%ETODO change 10000
 	{EndDate, EndTime} = datetime:add_second_to_datetime( DuratonInSeconds * 10000, StartDatetime ),
 	io:fwrite( "EndDate: {~p,~p}~n", [EndDate, EndTime] ),
 	{ {EndDate, EndTime}, DuratonInSeconds }.

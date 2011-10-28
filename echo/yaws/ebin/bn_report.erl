@@ -43,8 +43,6 @@ sync_subscribe() ->
 unsubscribe() ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {unsubscribe, self()}).
 
-%TODO do notification via "gen_server:call" !!! ???
-
 %%====================================================================
 %% gen_server callbacks
 %%====================================================================

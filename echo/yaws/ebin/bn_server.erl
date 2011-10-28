@@ -68,15 +68,16 @@ init([]) ->
 
 	io:fwrite( "Init with instruments: ~p~n", [?INSTRUMENTS] ),
 
-	bn_report:start_link(),
-
 	State = dict:store( dealer_info_by_instrument, dict:new(), dict:new() ),
 
 	StartDatetime = start_datetime(),
 	{ EndDatetime, Duration } = end_datetime( StartDatetime ),
 	NewState = dict:store( dete_settings, { StartDatetime, EndDatetime, Duration }, State ),
 
-	{ ok, NewState }.
+	{ok,ReportPid} = bn_report:start_link(),
+	InitialState = set_report_pid( ReportPid, NewState ),
+
+	{ ok, InitialState }.
 
 %%--------------------------------------------------------------------
 %% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -89,7 +90,6 @@ init([]) ->
 %%--------------------------------------------------------------------
 handle_call({get_dealer, Deal}, _From, State) ->
 	process_get_dealer( State, Deal ).
-	%{reply, Reply, State}.
 
 %%--------------------------------------------------------------------
 %% Function: handle_cast(Msg, State) -> {noreply, State} |
@@ -111,7 +111,18 @@ handle_info({'EXIT',_Pid,normall}, State) ->
 	{noreply, State};
 
 handle_info({'EXIT',Pid,_Reason}, State) ->
-	NewState = remove_dealer_pid( Pid, State ),
+	ReportPid = get_report_pid( State ),
+	NewState = case Pid of
+		ReportPid ->
+			case bn_report:start_link() of
+				{ok,ReportPid} ->
+					set_report_pid( ReportPid, State );
+				_Other ->
+					State
+			end;
+		_Other ->
+			remove_dealer_pid( Pid, State )
+	end,
 	{noreply, NewState};
 
 handle_info(_Info, State) ->
@@ -161,7 +172,7 @@ run_new_dealer_for_instrument( State, Instrument ) ->
 	EndDealerDatetime = datetime:nearest_expiration_datetime( DateSettings ),
 	StartDealerDatetime = datetime:add_second_to_datetime( -?REPORT_DURATION_SEC, EndDealerDatetime ),
 	DealerDateRange = { StartDealerDatetime, EndDealerDatetime, Duration },
-	DealerPid = bn_dealer:start_link( Instrument, DealerDateRange ),
+	{ok,DealerPid} = bn_dealer:start_link( Instrument, DealerDateRange ),
 	NewState = set_dealer_info( State, Instrument, { DealerPid, EndDealerDatetime } ),
 	{ NewState, DealerPid }.
 
@@ -203,9 +214,15 @@ remove_dealer_pid( Pid, State ) ->
 		end, DealerPidAndExpDateByInstrument),
 	dict:store( dealer_info_by_instrument, NewDealerPidAndExpDateByInstrument, State ).
 
+get_report_pid( State ) ->
+	{ ok, ReportPid } = dict:find( report_pid, State ),
+	ReportPid.
+
+set_report_pid( ReportPid, State ) ->
+	dict:store( report_pid, ReportPid, State ).
+
 %returns { ok, { DealerPid, ExpirationDate } } or error
 find_dealer_info( State, Instrument ) ->
-	%io:fwrite( "Print State: ~p~n", [State] ),
 	{ ok, DealerPidAndExpDateByInstrument } = dict:find( dealer_info_by_instrument, State ),
 	dict:find( Instrument, DealerPidAndExpDateByInstrument ).
 

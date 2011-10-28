@@ -21,8 +21,7 @@
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link( InstrumentName, DatetimeSettings ) ->
-	{ok,Pid} = gen_server:start_link(?MODULE, [InstrumentName, DatetimeSettings], []),
-	Pid.
+	gen_server:start_link(?MODULE, [InstrumentName, DatetimeSettings], []).
 
 %%====================================================================
 %% gen_server callbacks
@@ -143,8 +142,8 @@ get_report_data( State ) ->
 	{ ok, ReportData } = dict:find( report_data, State ),
 	ReportData.
 
-set_report_data( NewReportData, State ) ->
-	dict:store( report_data, NewReportData, State ).
+set_report_data( ReportData, State ) ->
+	dict:store( report_data, ReportData, State ).
 
 process_deal( State, { _DealInstrument, _DealTime, DealPrice, DealAmount } ) ->
 	{ OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),

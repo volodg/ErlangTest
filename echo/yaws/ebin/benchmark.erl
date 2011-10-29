@@ -5,7 +5,7 @@
 -include("bn_config.hrl").
 
 init() ->
-	bn_report:sync_subscribe(),
+	bn_report:subscribe(),
 	Deal = bn_common:random_deal(),
 	NewDeal = #deal{instrument=Deal#deal.instrument, datetime=Deal#deal.datetime, price=Deal#deal.price, amount=1},
 	DealRes = bn_server:deal( NewDeal ),
@@ -25,7 +25,7 @@ run() ->
 
 receive_report( [], AmountAsDealCount, Children ) ->
 	io:fwrite( "benchmark finished with result: ~p~n", [AmountAsDealCount] ),
-	lists:foreach(fun(H) -> exit(H, kill) end, Children),
+	lists:foreach(fun(H) -> exit(H, normal) end, Children),
 	exit( normal );
 
 receive_report( Instruments, AmountAsDealCount, Children ) ->
@@ -55,7 +55,6 @@ trader() ->
 		{ ok, _Resp } ->
 			true;
 		{ error, _Descr } ->
-			%io:fwrite( "Deal fail reason: ~p~n", [Descr] );
 			true;
 		_Other ->
 			true

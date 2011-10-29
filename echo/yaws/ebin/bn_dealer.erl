@@ -37,7 +37,6 @@ start_link( InstrumentName, DatetimeSettings ) ->
 init( [ InstrumentName, DatetimeSettings ] ) ->
 	{ StartDatetime, EndDatetime, _DelaySeconds } = DatetimeSettings,
 
-	%ETODO if datetime:now_datetime() > ExpirationDatetime ????
 	Delay = datetime:datetime_difference_in_seconds( datetime:now_datetime(), EndDatetime ) * 1000,
 	timer:send_after( Delay, send_report ),
 

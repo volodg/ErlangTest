@@ -9,8 +9,7 @@
 		stop/0,
         notify/1,
 		subscribe/0,
-		unsubscribe/0,
-		sync_subscribe/0]).
+		unsubscribe/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -43,17 +42,11 @@ stop() ->
 notify(Msg) ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {notify_all, Msg}).
 
-%TODO remove this method
 subscribe() ->
-	gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, self()}).
-
-%TODO return sender Pid
-sync_subscribe() ->
 	gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe).
 
-%TODO should be call
 unsubscribe() ->
-	gen_server:cast( { ?SERVER, ?SRV_NODE }, {unsubscribe, self()}).
+	gen_server:call( { ?SERVER, ?SRV_NODE }, unsubscribe).
 
 %%====================================================================
 %% gen_server callbacks
@@ -78,15 +71,7 @@ init([]) ->
 %%--------------------------------------------------------------------
 handle_cast( { notify_all, Msg }, State ) ->
 	lists:foreach(fun(H) -> H ! Msg end, State),
-	{noreply, State};
-
-handle_cast({subscribe, Pid}, State) ->
-	NewState = subscribe_pid(State, Pid),
-	{noreply, NewState};
-
-handle_cast({unsubscribe, Pid}, State) ->
-	NewState = lists:delete(Pid, State),
-	{noreply, NewState}.
+	{noreply, State}.
 
 %% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -99,6 +84,11 @@ handle_cast({unsubscribe, Pid}, State) ->
 handle_call(subscribe, From, State) ->
 	{Pid,_Tag} = From,
 	NewState = subscribe_pid(State, Pid),
+	{reply, ok, NewState};
+
+handle_call(unsubscribe, From, State) ->
+	{Pid,_Tag} = From,
+	NewState = lists:delete(Pid, State),
 	{reply, ok, NewState};
 
 handle_call(_Request, _From, State) ->

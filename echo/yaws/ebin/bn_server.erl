@@ -5,7 +5,8 @@
 %% API
 -export([start_link/0,
 		stop/0,
-        deal/1]).
+        deal/1,
+		deal/4]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -33,8 +34,6 @@ stop() ->
 			exit( Pid, normal )
 	end.
 
-%ETODO add stop method
-
 %%--------------------------------------------------------------------
 %% Function: notify(Msg) -> ok
 %% Description: Creates a bank account for the person with name Name
@@ -52,6 +51,13 @@ deal( Deal ) ->
 					Other
 			end
 	end.
+
+deal( Instrument, Datetime, Price, Amount ) ->
+	Deal = #deal{ instrument=Instrument,
+	 				datetime=Datetime,
+					price   =Price,
+					amount  =Amount },
+	deal( Deal ).
 
 %%====================================================================
 %% gen_server callbacks
@@ -144,8 +150,7 @@ start_datetime() ->
 end_datetime( StartDatetime ) ->
 	DuratonInSeconds = ?REPORT_DURATION_SEC,
 	io:fwrite( "DuratonInSeconds: ~p~n", [DuratonInSeconds] ),
-	%ETODO change 10000
-	{EndDate, EndTime} = datetime:add_second_to_datetime( DuratonInSeconds * 10000, StartDatetime ),
+	{EndDate, EndTime} = datetime:add_second_to_datetime( DuratonInSeconds * ?REPORT_DURATION_NUM, StartDatetime ),
 	io:fwrite( "EndDate: {~p,~p}~n", [EndDate, EndTime] ),
 	{ {EndDate, EndTime}, DuratonInSeconds }.
 

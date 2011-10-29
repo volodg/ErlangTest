@@ -21,6 +21,14 @@ CFLAGS=-O0 ./configure --prefix=/usr/share/erlang --enable-threads --enable-darw
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+1. Add supervisor on all - 
+http://spawnlink.com/otp-intro-4-supervisors-eb-sup-skeleton/index.html
+http://habrahabr.ru/blogs/erlang/129277/
+"transient", то процесс запускается заново только в случае непредвиденного завершения.
+one_for_one — Когда один из дочерних процессов умирает, контролёр перезапускает его. Другие потомки не трогаются.
+
+1.1. add save state at restarting dealer
+
 2. Document all
 
 3. Test different issues, errors and timeouts

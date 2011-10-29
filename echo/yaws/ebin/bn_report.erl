@@ -17,9 +17,6 @@
 
 -define(SERVER, ?MODULE).
 
-%ETODO improve report restart and send recnnect all
-%ETODO send report with own pid
-
 %%====================================================================
 %% API
 %%====================================================================

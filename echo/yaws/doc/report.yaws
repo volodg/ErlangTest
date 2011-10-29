@@ -40,8 +40,8 @@
 				yaws_api:stream_process_end(closed, YawsPid),
 				exit(normal);
 			{ ReportPid, live_pkg } ->
-				rec_loop( Socket, YawsPid, ReportPid );
-			after 10000 ->
-				connect_report( Socket, YawsPid )
+				rec_loop( Socket, YawsPid, ReportPid )
+		after 10000 ->
+			connect_report( Socket, YawsPid )
 		end.
 </erl>

@@ -6,7 +6,7 @@ SERVER
 1. erl -sname server
 % Node: server@Mac-Pro-Vladimir
 2. c(bn_server).
-3. bn_server:start().
+3. bn_server:start_link().
 4. bn_server:stop().
 
 Compile all - lc([benchmark,bn_common,bn_dealer,bn_report,bn_server,datetime,selftest]).

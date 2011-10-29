@@ -75,12 +75,12 @@ test_invalid_deal_amount() ->
 
 receive_report_loop( Instrument, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount, Delay ) ->
 	receive
-		#report{instrument=Instrument,
-				open_price=OpenPrice,
-				close_price=ClosePrice,
-				min_proce=MinPrice,
-				max_price=MaxPrice,
-				total_amount=TotalAmount} ->
+		{ _ReportPid, #report{instrument=Instrument,
+							open_price=OpenPrice,
+							close_price=ClosePrice,
+							min_proce=MinPrice,
+							max_price=MaxPrice,
+							total_amount=TotalAmount} } ->
 			io:fwrite( "Report received for Instrument: ~p~n", [ Instrument ] ),
 			true;
 		#report{} ->

@@ -17,6 +17,9 @@
 
 -define(SERVER, ?MODULE).
 
+%ETODO improve report restart and send recnnect all
+%ETODO send report with own pid
+
 %%====================================================================
 %% API
 %%====================================================================
@@ -61,6 +64,7 @@ unsubscribe() ->
 %%--------------------------------------------------------------------
 init([]) ->
 	process_flag(trap_exit, true),
+	timer:send_after( 5000, send_live_pkg ),
 	{ok, []}.
 
 %%--------------------------------------------------------------------
@@ -70,7 +74,7 @@ init([]) ->
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
 handle_cast( { notify_all, Msg }, State ) ->
-	lists:foreach(fun(H) -> H ! Msg end, State),
+	lists:foreach(fun(H) -> H ! { self(), Msg } end, State),
 	{noreply, State}.
 
 %% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -84,7 +88,7 @@ handle_cast( { notify_all, Msg }, State ) ->
 handle_call(subscribe, From, State) ->
 	{Pid,_Tag} = From,
 	NewState = subscribe_pid(State, Pid),
-	{reply, ok, NewState};
+	{reply, self(), NewState};
 
 handle_call(unsubscribe, From, State) ->
 	{Pid,_Tag} = From,
@@ -100,6 +104,11 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
+handle_info(send_live_pkg, State) ->
+	timer:send_after( 5000, send_live_pkg ),
+	lists:foreach(fun(H) -> H ! { self(), live_pkg } end, State),
+	{noreply, State};
+
 handle_info({'EXIT',Pid,_Reason}, State) ->
 	NewState = lists:delete(Pid, State),
 	{noreply, NewState};
@@ -115,7 +124,7 @@ handle_info(_Info, State) ->
 %% The return value is ignored.
 %%--------------------------------------------------------------------
 terminate(_Reason, State) ->
-	lists:foreach(fun(H) -> H ! finish end, State),
+	lists:foreach(fun(H) -> H ! { self(), finish } end, State),
 	ok.
 
 %%--------------------------------------------------------------------

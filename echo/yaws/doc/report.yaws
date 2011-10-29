@@ -13,30 +13,35 @@
 			{header, {"Connection", "keep-alive"} },
 			{streamcontent_from_pid, "text/plain", Pid}].
 
-	rec_loop(Sock) ->
+	rec_loop(Socket) ->
 		receive
 			{discard, YawsPid} ->
-				yaws_api:stream_process_end(Sock, YawsPid);
+				yaws_api:stream_process_end(Socket, YawsPid);
 			{ok, YawsPid} ->
-				bn_report:subscribe(),
-				rec_loop(Sock, YawsPid);
+				connect_report(Socket, YawsPid);
 			Other ->
 				{ html, "error" }
 		end,
 		exit(normal).
 
-	rec_loop( Socket, YawsPid ) ->
+	connect_report( Socket, YawsPid ) ->
+		ReportPid = bn_report:subscribe(),
+		rec_loop(Socket, YawsPid, ReportPid).
+
+	rec_loop( Socket, YawsPid, ReportPid ) ->
 		receive
-			{ report, DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } ->
+			{ ReportPid, { report, DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } } ->
 				ReportFormat = "Instr: ~p OpenDatetime: ~p OpenPrice: ~p ClosePrice: ~p MinPrice: ~p MaxPrice: ~p TotalAmount: ~p~n",
 				SendString = io_lib:format( ReportFormat, [ DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount ] ),
 				yaws_api:stream_process_deliver_chunk(Socket, SendString),
-				rec_loop( Socket, YawsPid );
-			finish ->
+				rec_loop( Socket, YawsPid, ReportPid );
+			{ ReportPid, finish } ->
 				yaws_api:stream_process_deliver_final_chunk(Socket, <<>>),
 				yaws_api:stream_process_end(closed, YawsPid),
 				exit(normal);
-			Other ->
-				{ html, "error" }
+			{ ReportPid, live_pkg } ->
+				rec_loop( Socket, YawsPid, ReportPid );
+			after 10000 ->
+				connect_report( Socket, YawsPid )
 		end.
 </erl>

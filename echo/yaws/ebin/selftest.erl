@@ -5,14 +5,16 @@
 -include("bn_config.hrl").
 
 run() ->
-	bn_server:start(),
+	bn_server:start_link(),
+	bn_report:start_link(),
 	case catch( test_deals() ) of
 		true ->
 			io:fwrite( "TESTS PASSED~n" );
 		{error, Msg, Details } ->
 			io:fwrite( "TESTS FAILED: ~p [~p]~n", [ Msg, Details ] )
 	end,
-	bn_server:stop().
+	bn_server:stop(),
+	bn_report:stop().
 
 valid_dealer_response( Resp ) ->
 	case Resp of

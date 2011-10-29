@@ -6,6 +6,7 @@
 
 %% API
 -export([start_link/0,
+		stop/0,
         notify/1,
 		subscribe/0,
 		unsubscribe/0,
@@ -27,6 +28,14 @@
 start_link() ->
 	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
+stop() ->
+	case whereis(?SERVER) of
+		undefined ->
+			io:fwrite( "Report not runned~n" );
+		Pid ->
+			exit( Pid, normal )
+	end.
+
 %%--------------------------------------------------------------------
 %% Function: notify(Msg) -> ok
 %% Description: Creates a bank account for the person with name Name
@@ -34,12 +43,15 @@ start_link() ->
 notify(Msg) ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {notify_all, Msg}).
 
+%TODO remove this method
 subscribe() ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {subscribe, self()}).
 
+%TODO return sender Pid
 sync_subscribe() ->
 	gen_server:call( { ?SERVER, ?SRV_NODE }, subscribe).
 
+%TODO should be call
 unsubscribe() ->
 	gen_server:cast( { ?SERVER, ?SRV_NODE }, {unsubscribe, self()}).
 

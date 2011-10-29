@@ -40,11 +40,12 @@ start_link() ->
 %% specifications.
 %%--------------------------------------------------------------------
 init([]) ->
-  Server = {bn_server, {bn_server, start_link, []},
-            permanent,2000,worker,[bn_server]},
-  Report = {bn_report, {bn_report, start_link, []},
-         permanent,2000,worker,[bn_report]},
-  {ok,{{one_for_one,5,10}, [Server, Report]}}.
+	ShutdownTimeout = 2000,
+	Server = {bn_server, {bn_server, start_link, []},
+			permanent,ShutdownTimeout,worker,[bn_server]},
+	Report = {bn_report, {bn_report, start_link, []},
+			permanent,ShutdownTimeout,worker,[bn_report]},
+	{ok,{{one_for_one,5,10}, [Server, Report]}}.
 
 %%====================================================================
 %% Internal functions

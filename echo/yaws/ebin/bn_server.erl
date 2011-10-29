@@ -3,7 +3,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start/0,
+-export([start_link/0,
 		stop/0,
         deal/1]).
 
@@ -22,7 +22,7 @@
 %% Function: start() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
 %%--------------------------------------------------------------------
-start() ->
+start_link() ->
 	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 stop() ->
@@ -75,10 +75,7 @@ init([]) ->
 	{ EndDatetime, Duration } = end_datetime( StartDatetime ),
 	NewState = dict:store( dete_settings, { StartDatetime, EndDatetime, Duration }, State ),
 
-	{ok,ReportPid} = bn_report:start_link(),
-	InitialState = set_report_pid( ReportPid, NewState ),
-
-	{ ok, InitialState }.
+	{ ok, NewState }.
 
 %%--------------------------------------------------------------------
 %% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -112,18 +109,7 @@ handle_info({'EXIT',_Pid,normall}, State) ->
 	{noreply, State};
 
 handle_info({'EXIT',Pid,_Reason}, State) ->
-	ReportPid = get_report_pid( State ),
-	NewState = case Pid of
-		ReportPid ->
-			case bn_report:start_link() of
-				{ok,ReportPid} ->
-					set_report_pid( ReportPid, State );
-				_Other ->
-					State
-			end;
-		_Other ->
-			remove_dealer_pid( Pid, State )
-	end,
+	NewState = remove_dealer_pid( Pid, State ),
 	{noreply, NewState};
 
 handle_info(_Info, State) ->
@@ -215,13 +201,6 @@ remove_dealer_pid( Pid, State ) ->
 		 end
 		end, DealerPidAndExpDateByInstrument),
 	dict:store( dealer_info_by_instrument, NewDealerPidAndExpDateByInstrument, State ).
-
-get_report_pid( State ) ->
-	{ ok, ReportPid } = dict:find( report_pid, State ),
-	ReportPid.
-
-set_report_pid( ReportPid, State ) ->
-	dict:store( report_pid, ReportPid, State ).
 
 %returns { ok, { DealerPid, ExpirationDate } } or error
 find_dealer_info( State, Instrument ) ->

@@ -73,9 +73,6 @@ init( [ InstrumentName, DatetimeSettings ] ) ->
 handle_cast(_Msg, State) ->
 	{noreply, State}.
 
-%ETODO process exit of child
-%remove child Pid in this case
-
 %% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
 %%                                      {noreply, State} |

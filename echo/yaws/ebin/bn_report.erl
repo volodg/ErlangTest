@@ -60,7 +60,6 @@ unsubscribe() ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init([]) ->
-	process_flag(trap_exit, true),
 	timer:send_after( 5000, send_live_pkg ),
 	{ok, []}.
 
@@ -89,7 +88,7 @@ handle_call(subscribe, From, State) ->
 
 handle_call(unsubscribe, From, State) ->
 	{Pid,_Tag} = From,
-	NewState = lists:delete(Pid, State),
+	NewState = unsubscribe_pid(State, Pid),
 	{reply, ok, NewState};
 
 handle_call(_Request, _From, State) ->
@@ -106,8 +105,13 @@ handle_info(send_live_pkg, State) ->
 	lists:foreach(fun(H) -> H ! { self(), live_pkg } end, State),
 	{noreply, State};
 
-handle_info({'EXIT',Pid,_Reason}, State) ->
-	NewState = lists:delete(Pid, State),
+handle_info({'DOWN', _MonitorRef, _Type, Object, _Info}, State) ->
+	NewState = case is_pid( Object ) of
+		true ->
+			lists:delete(Object, State);
+		false ->
+			State
+	end,
 	{noreply, NewState};
 
 handle_info(_Info, State) ->
@@ -135,6 +139,10 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%--------------------------------------------------------------------
 
+unsubscribe_pid(State, Pid) ->
+	demonitor(Pid),
+	lists:delete(Pid, State).
+
 subscribe_pid(State, Pid) ->
-	link( Pid ),
+	monitor(process, Pid),
 	lists:append(State, [Pid]).

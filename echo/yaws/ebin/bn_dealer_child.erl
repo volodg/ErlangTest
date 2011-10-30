@@ -5,7 +5,7 @@
 -include("bn_config.hrl").
 
 %% API
--export([start_link/3]).
+-export([start_link/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -18,8 +18,8 @@
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
 %%--------------------------------------------------------------------
-start_link( Parent, InstrumentName, DatetimeSettings ) ->
-	gen_server:start_link(?MODULE, [Parent, InstrumentName, DatetimeSettings], []).
+start_link( Parent, DatetimeSettings ) ->
+	gen_server:start_link(?MODULE, [Parent, DatetimeSettings], []).
 
 %%====================================================================
 %% gen_server callbacks
@@ -32,7 +32,7 @@ start_link( Parent, InstrumentName, DatetimeSettings ) ->
 %%                         {stop, Reason}
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
-init( [ Parent, InstrumentName, DatetimeSettings ] ) ->
+init( [ Parent, DatetimeSettings ] ) ->
 	{ StartDatetime, EndDatetime, _DelaySeconds } = DatetimeSettings,
 
 	Delay = datetime:datetime_difference_in_seconds( datetime:now_datetime(), EndDatetime ) * 1000,
@@ -48,8 +48,7 @@ init( [ Parent, InstrumentName, DatetimeSettings ] ) ->
 	State = set_report_data( InitialReportData, dict:new() ),
 
 	StateWithDatetime = dict:store( datetime_settings, DatetimeSettings, State ),
-	StateWithParent = dict:store( parent, Parent, StateWithDatetime ),
-	InitialState = dict:store( dealer_instrument, InstrumentName, StateWithParent ),
+	InitialState = dict:store( parent, Parent, StateWithDatetime ),
 
 	{ok, InitialState}.
 
@@ -96,7 +95,7 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
-handle_info(send_report, State) ->
+handle_info(send_report_part, State) ->
 	send_report( State ),
 	{stop, normal, State};
 
@@ -128,10 +127,6 @@ get_dealer_parent( State ) ->
 	{ ok, Parent } = dict:find( parent, State ),
 	Parent.
 
-get_dealer_instrument( State ) ->
-	{ ok, DealerInstrument } = dict:find( dealer_instrument, State ),
-	DealerInstrument.
-
 get_datetime_setting( State ) ->
 	{ ok, DatetimeSetting } = dict:find( datetime_settings, State ),
 	DatetimeSetting.
@@ -144,6 +139,7 @@ set_report_data( ReportData, State ) ->
 	dict:store( report_data, ReportData, State ).
 
 process_deal( State, Deal ) ->
+	%timer:sleep(10),%simulate difficult calculation
 	{ OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
 
 	NowDatetime = datetime:now_datetime(),
@@ -164,14 +160,7 @@ process_deal( State, Deal ) ->
 	set_report_data( NewReportData, State ).
 
 send_report( State ) ->
-	{ OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
-	Report = #report{instrument  =get_dealer_instrument( State ),
-					 open_time   =OpenTime,
-					 open_price  =OpenPrice,
-					 close_price =ClosePrice,
-					 min_proce   =MinPrice,
-					 max_price   =MaxPrice,
-					 total_amount=TotalAmount},
+	Report = get_report_data( State ),
 	Parent = get_dealer_parent( State ),
 	Parent ! { self(), sub_report, Report },
 	exit( normal ).

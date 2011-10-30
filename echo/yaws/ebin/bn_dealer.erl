@@ -5,7 +5,7 @@
 -include("bn_config.hrl").
 
 %% API
--export([start_link/2]).
+-export([start_link/2,deal/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -20,6 +20,19 @@
 %%--------------------------------------------------------------------
 start_link( InstrumentName, DatetimeSettings ) ->
 	gen_server:start_link(?MODULE, [InstrumentName, DatetimeSettings], []).
+
+deal(DealerPid, Deal) ->
+	case catch( gen_server:call( DealerPid, get_dealer) ) of
+		{normal, _Msg} ->
+			{ error, "Dealer already unavailable" };
+		SubDealerPid ->
+			case catch( gen_server:call( SubDealerPid, {deal, Deal}) ) of
+				{normal, _Msg} ->
+					{ error, "Dealer already unavailable" };
+				Other ->
+					Other
+			end
+	end.
 
 %%====================================================================
 %% gen_server callbacks
@@ -69,7 +82,7 @@ handle_cast(_Msg, State) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
-handle_call({deal,_Deal}, _From, State) ->
+handle_call(get_dealer, _From, State) ->
 	case get_reporting( State ) of
 		true ->
 			{reply, {error, "Out of date deal"}, State};
@@ -181,19 +194,17 @@ send_report( State ) ->
 			bn_report:notify( Report )
 	end.
 
-%ETODO refactor this
-%ETODO check reporting flag here
-collect_report( SubDealerPid, Report, State ) ->
+process_sub_dealer_report( Report, State ) ->
 	{ OpenDatetime, OpenPriceDatetime, ClosePriceDatetime, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
-	NewState = case TotalAmount of
+	case TotalAmount of
 		0 ->
 			set_report_data( Report, State );
-		_Other ->
+		_TotalAmount ->
 			{ DealOpenDatetime, DealOpenPriceDatetime, DealClosePriceDatetime, DealMinPrice, DealMaxPrice, DealTotalAmount } = Report,
 			case DealTotalAmount of
 				0 ->
 					State;
-				_Other1 ->
+				_DealTotalAmount ->
 					NewOpenDatetime = datetime:less_datetime( DealOpenDatetime, OpenDatetime ),
 
 					{ _OpenPrice, OpenPriceDateTime } = OpenPriceDatetime,
@@ -220,7 +231,11 @@ collect_report( SubDealerPid, Report, State ) ->
 					NewReport = { NewOpenDatetime, NewOpenPrice, NewClosePrice, NewMinPrice, NewMaxPrice, NewTotalAmount },
 					set_report_data( NewReport, State )
 			end
-	end,
+	end.
+
+%ETODO process exit of child
+collect_report( SubDealerPid, Report, State ) ->
+	NewState = process_sub_dealer_report( Report, State ),
 	SubDealers = get_sub_dealers( NewState ),
 	NewSubDealers = lists:delete( SubDealerPid, SubDealers ),
 	NewState2 = set_sub_dealers( NewSubDealers, NewState ),

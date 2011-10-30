@@ -5,7 +5,7 @@
 -include("bn_config.hrl").
 
 %% API
--export([start_link/2]).
+-export([start_link/2,deal/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -22,6 +22,14 @@
 %%--------------------------------------------------------------------
 start_link( InstrumentName, DatetimeSettings ) ->
 	gen_server:start_link(?MODULE, [InstrumentName, DatetimeSettings], []).
+
+deal(DealerPid, Deal) ->
+	case catch( gen_server:call( DealerPid, {deal, Deal}) ) of
+		{normal, _Msg} ->
+			{ error, "Dealer already unavailable" };
+		Other ->
+			Other
+	end.
 
 %%====================================================================
 %% gen_server callbacks

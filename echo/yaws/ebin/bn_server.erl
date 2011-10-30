@@ -39,17 +39,13 @@ stop() ->
 %% Description: Creates a bank account for the person with name Name
 %%--------------------------------------------------------------------
 deal( Deal ) ->
+	%validate arguments here, in client thread !!!
 	Response = gen_server:call( { ?SERVER, ?SRV_NODE }, {get_dealer, Deal}),
 	case Response of
 		{ error, ValidationErrorDescr } ->
 			{ error, ValidationErrorDescr };
 		{ dealer_pid, DealerPid } ->
-			case catch( gen_server:call( DealerPid, {deal, Deal}) ) of
-				{normal, _Msg} ->
-					{ error, "Dealer already unavailable" };
-				Other ->
-					Other
-			end
+			bn_dealer:deal(DealerPid, Deal)
 	end.
 
 deal( Instrument, Datetime, Price, Amount ) ->

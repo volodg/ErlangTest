@@ -46,6 +46,8 @@ deal(DealerPid, Deal) ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init( [ InstrumentName, DatetimeSettings ] ) ->
+	process_flag(trap_exit, true),
+
 	State               = set_reporting( false, dict:new() ),
 	StateWithSubDealers = dict:store( sub_dealers, [], State ),
 	StateWithDatetime   = dict:store( datetime_settings, DatetimeSettings, StateWithSubDealers ),
@@ -100,6 +102,10 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
+handle_info({'EXIT',SubDealerPid,_Reason}, State) ->
+	NewState = remove_sub_dealer_pid( SubDealerPid, State ),
+	{noreply, NewState};
+
 handle_info( { SubDealerPid, sub_report, Report }, State) ->
 	NewState = set_reporting( true, State ),
 	collect_report( SubDealerPid, Report, NewState );
@@ -233,13 +239,16 @@ process_sub_dealer_report( Report, State ) ->
 			end
 	end.
 
+remove_sub_dealer_pid( SubDealerPid, State ) ->
+	SubDealers = get_sub_dealers( State ),
+	NewSubDealers = lists:delete( SubDealerPid, SubDealers ),
+	set_sub_dealers( NewSubDealers, State ).
+
 %ETODO process exit of child
 collect_report( SubDealerPid, Report, State ) ->
-	NewState = process_sub_dealer_report( Report, State ),
-	SubDealers = get_sub_dealers( NewState ),
-	NewSubDealers = lists:delete( SubDealerPid, SubDealers ),
-	NewState2 = set_sub_dealers( NewSubDealers, NewState ),
-	case NewSubDealers of
+	NewState1 = process_sub_dealer_report( Report, State ),
+	NewState2 = remove_sub_dealer_pid( SubDealerPid, NewState1 ),
+	case get_sub_dealers( NewState2 ) of
 		[] ->
 			send_report( NewState2 ),
 			{stop, normal, NewState2};

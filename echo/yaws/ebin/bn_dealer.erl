@@ -11,8 +11,6 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
 
--define(SERVER, ?MODULE).
-
 %%====================================================================
 %% API
 %%====================================================================
@@ -35,22 +33,19 @@ start_link( InstrumentName, DatetimeSettings ) ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init( [ InstrumentName, DatetimeSettings ] ) ->
-	{ StartDatetime, EndDatetime, _DelaySeconds } = DatetimeSettings,
-
-	Delay = datetime:datetime_difference_in_seconds( datetime:now_datetime(), EndDatetime ) * 1000,
-	timer:send_after( Delay, send_report ),
+	State               = set_reporting( false, dict:new() ),
+	StateWithSubDealers = dict:store( sub_dealers, [], State ),
+	StateWithDatetime   = dict:store( datetime_settings, DatetimeSettings, StateWithSubDealers ),
+	StateWithInstrument = dict:store( dealer_instrument, InstrumentName, StateWithDatetime ),
 
 	TotalAmount = 0,
 	OpenPrice = 0,
 	ClosePrice = 0,
 	MinPrice = 0,
 	MaxPrice = 0,
-	OpenDatetime = StartDatetime,
+	OpenDatetime = 0,
 	InitialReportData = { OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount },
-	State = set_report_data( InitialReportData, dict:new() ),
-
-	StateWithDatetime = dict:store( datetime_settings, DatetimeSettings, State ),
-	InitialState = dict:store( dealer_instrument, InstrumentName, StateWithDatetime ),
+	InitialState = set_report_data( InitialReportData, StateWithInstrument ),
 
 	{ok, InitialState}.
 
@@ -63,6 +58,9 @@ init( [ InstrumentName, DatetimeSettings ] ) ->
 handle_cast(_Msg, State) ->
 	{noreply, State}.
 
+%ETODO process exit of child
+%remove child Pid in this case
+
 %% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
 %%                                      {noreply, State} |
@@ -71,26 +69,14 @@ handle_cast(_Msg, State) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
-handle_call({deal,Deal}, _From, State) ->
-	DealerDateRange = get_datetime_setting( State ),
-	{ _StartDatetime, EndDatetime, _DelaySeconds } = DealerDateRange,
-	Expared = not datetime:datetime_earlier_than_datetime( datetime:now_datetime(), EndDatetime ),
-	Response = case Expared of
+handle_call({deal,_Deal}, _From, State) ->
+	case get_reporting( State ) of
 		true ->
-			send_report( State ),
-			{stop, normal, State};
+			{reply, {error, "Out of date deal"}, State};
 		false ->
-			ValidDealArgs = bn_common:validate_deal_args( [ get_dealer_instrument( State ) ], DealerDateRange, Deal ),
-
-			case ValidDealArgs of
-				true ->
-					NewState = process_deal( State, Deal ),
-					{reply, {ok, "Good deal"}, NewState};
-				{ error, ValidationErrorDescr } ->
-					{reply, {error, ValidationErrorDescr}, State}
-			end
-	end,
-	Response;
+			{ NewState, SubDealerPid } = get_dealer_child( State ),
+			{reply, SubDealerPid, NewState}
+	end;
 
 handle_call(_Request, _From, State) ->
 	{noreply, State}.
@@ -101,9 +87,9 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
-handle_info(send_report, State) ->
-	send_report( State ),
-	{stop, normal, State};
+handle_info( { SubDealerPid, sub_report, Report }, State) ->
+	NewState = set_reporting( true, State ),
+	collect_report( SubDealerPid, Report, NewState );
 
 handle_info(_Info, State) ->
 	{noreply, State}.
@@ -129,50 +115,119 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%--------------------------------------------------------------------
 
+get_existing_rec_for_key( Key, State ) ->
+	{ ok, Result } = dict:find( Key, State ),
+	Result.
+
+get_reporting( State ) ->
+	get_existing_rec_for_key( reporting, State ).
+
+set_reporting( Flag, State ) ->
+	dict:store( reporting, Flag, State ).
+
+get_sub_dealers( State ) ->
+	get_existing_rec_for_key( sub_dealers, State ).
+
+set_sub_dealers( SubDealers, State ) ->
+	dict:store( sub_dealers, SubDealers, State ).
+
 get_dealer_instrument( State ) ->
-	{ ok, DealerInstrument } = dict:find( dealer_instrument, State ),
-	DealerInstrument.
+	get_existing_rec_for_key( dealer_instrument, State ).
 
 get_datetime_setting( State ) ->
-	{ ok, DatetimeSetting } = dict:find( datetime_settings, State ),
-	DatetimeSetting.
+	get_existing_rec_for_key( datetime_settings, State ).
 
 get_report_data( State ) ->
-	{ ok, ReportData } = dict:find( report_data, State ),
-	ReportData.
+	get_existing_rec_for_key( report_data, State ).
 
 set_report_data( ReportData, State ) ->
 	dict:store( report_data, ReportData, State ).
 
-process_deal( State, Deal ) ->
-	{ OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
+create_sub_dealer( State ) ->
+	DealerDateRange = get_datetime_setting( State ),
+	{ok,SubDealerPid} = bn_dealer_child:start_link( self(), DealerDateRange ),
+	SubDealerPid.
 
-	NewReportData = case TotalAmount of
-		0 ->
-			%first deal here on instrument
-			{ OpenTime, Deal#deal.price, Deal#deal.price, Deal#deal.price, Deal#deal.price, Deal#deal.amount };
+%ETODO if child dealer is free it should pass self to begin of list
+get_dealer_child( State ) ->
+	SubDealers = get_sub_dealers( State ),
+	case length( SubDealers ) of
+		Count when Count >= ?DEALERS_PER_INSTRUMENT ->
+			[ Pid | OtherPids ] = SubDealers,
+			NewState = set_sub_dealers( lists:append( OtherPids, [Pid] ), State ),
+			{ NewState, Pid };
 		_Other ->
-			RecTotalAmount = TotalAmount + Deal#deal.amount,
-			RecClosePrice = Deal#deal.price,
-			RecMinPrice = min( MinPrice, Deal#deal.price ),
-			RecMaxPrice = max( MaxPrice, Deal#deal.price ),
-			{ OpenTime, OpenPrice, RecClosePrice, RecMinPrice, RecMaxPrice, RecTotalAmount }
-	end,
-
-	set_report_data( NewReportData, State ).
+			Pid = create_sub_dealer( State ),
+			NewState = set_sub_dealers( lists:append( SubDealers, [Pid] ), State ),
+			{ NewState, Pid }
+	end.
 
 send_report( State ) ->
-	{ OpenTime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
+	{ OpenDatetime, OpenPriceDatetime, ClosePriceDatetime, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
+
 	case TotalAmount of
-		TotalAmount when TotalAmount > 0 ->
-			Report = #report{instrument  =get_dealer_instrument( State ),
-							 open_time   =OpenTime,
-							 open_price  =OpenPrice,
-							 close_price =ClosePrice,
-							 min_proce   =MinPrice,
-							 max_price   =MaxPrice,
-							 total_amount=TotalAmount},
-			bn_report:notify( Report );
+		0 ->
+			true;
 		_Other ->
-			ignore
+			{ OpenPrice, _OpenPriceDateTime } = OpenPriceDatetime,
+			{ ClosePrice, _ClosePriceDateTime } = ClosePriceDatetime,
+			Report = #report{instrument =get_dealer_instrument( State ),
+							open_time   =OpenDatetime,
+							open_price  =OpenPrice,
+							close_price =ClosePrice,
+							min_price   =MinPrice,
+							max_price   =MaxPrice,
+							total_amount=TotalAmount},
+			bn_report:notify( Report )
+	end.
+
+%ETODO refactor this
+%ETODO check reporting flag here
+collect_report( SubDealerPid, Report, State ) ->
+	{ OpenDatetime, OpenPriceDatetime, ClosePriceDatetime, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
+	NewState = case TotalAmount of
+		0 ->
+			set_report_data( Report, State );
+		_Other ->
+			{ DealOpenDatetime, DealOpenPriceDatetime, DealClosePriceDatetime, DealMinPrice, DealMaxPrice, DealTotalAmount } = Report,
+			case DealTotalAmount of
+				0 ->
+					State;
+				_Other1 ->
+					NewOpenDatetime = datetime:less_datetime( DealOpenDatetime, OpenDatetime ),
+
+					{ _OpenPrice, OpenPriceDateTime } = OpenPriceDatetime,
+					{ _DealOpenPrice, DealOpenPriceDateTime } = DealOpenPriceDatetime,
+					NewOpenPrice = case datetime:datetime_earlier_than_datetime( OpenPriceDateTime, DealOpenPriceDateTime ) of
+						true ->
+							OpenPriceDatetime;
+						false ->
+							DealOpenPriceDatetime
+					end,
+
+					{ _ClosePrice, ClosePriceDateTime } = ClosePriceDatetime,
+					{ _DealClosePrice, DealClosePriceDateTime } = DealClosePriceDatetime,
+					NewClosePrice = case datetime:datetime_earlier_than_datetime( ClosePriceDateTime, DealClosePriceDateTime ) of
+						true ->
+							DealClosePriceDatetime;
+						false ->
+							ClosePriceDatetime
+					end,
+
+					NewMinPrice = min( MinPrice, DealMinPrice ),
+					NewMaxPrice = max( MaxPrice, DealMaxPrice ),
+					NewTotalAmount = TotalAmount + DealTotalAmount,
+					NewReport = { NewOpenDatetime, NewOpenPrice, NewClosePrice, NewMinPrice, NewMaxPrice, NewTotalAmount },
+					set_report_data( NewReport, State )
+			end
+	end,
+	SubDealers = get_sub_dealers( NewState ),
+	NewSubDealers = lists:delete( SubDealerPid, SubDealers ),
+	NewState2 = set_sub_dealers( NewSubDealers, NewState ),
+	case NewSubDealers of
+		[] ->
+			send_report( NewState2 ),
+			{stop, normal, NewState2};
+		_Other2 ->
+			{noreply, NewState2}
 	end.

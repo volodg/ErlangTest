@@ -16,7 +16,7 @@
 		open_time,
 		open_price,
 		close_price,
-		min_proce,
+		min_price,
 		max_price,
 		total_amount
 	}).

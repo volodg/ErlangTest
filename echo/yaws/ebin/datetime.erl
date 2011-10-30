@@ -8,7 +8,8 @@
 ,valid_datetime/1
 ,nearest_expiration_datetime/1
 ,datetime_difference_in_seconds/2
-,now_datetime/0]).
+,now_datetime/0
+,less_datetime/2]).
 
 add_second_to_datetime(Seconds, Datetime) ->
 	StartSeconds = calendar:datetime_to_gregorian_seconds( Datetime ),
@@ -22,6 +23,14 @@ datetime_earlier_than_datetime( Datetime, ThanDatetime ) ->
 			true;
 		_Other ->
 			false
+	end.
+
+less_datetime( FirstDatetime, SecondDatetime ) ->
+	case datetime_earlier_than_datetime( FirstDatetime, SecondDatetime ) of
+		true ->
+			FirstDatetime;
+		false ->
+			SecondDatetime
 	end.
 
 datetime_within_datetimes( Datetime, StartDatetime, EndDatetime ) ->

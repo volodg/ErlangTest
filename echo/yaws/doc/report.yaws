@@ -42,6 +42,7 @@
 			{ ReportPid, live_pkg } ->
 				rec_loop( Socket, YawsPid, ReportPid )
 		after 10000 ->
+			io:fwrite( "reconnect after delay~p" ),
 			connect_report( Socket, YawsPid )
 		end.
 </erl>

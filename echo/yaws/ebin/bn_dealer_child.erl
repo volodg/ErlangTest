@@ -139,7 +139,7 @@ set_report_data( ReportData, State ) ->
 	dict:store( report_data, ReportData, State ).
 
 process_deal( State, Deal ) ->
-	%timer:sleep(10),%simulate difficult calculation
+	timer:sleep(10),%simulate difficult calculation
 	{ OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
 
 	NowDatetime = datetime:now_datetime(),

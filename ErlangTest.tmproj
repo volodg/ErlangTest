@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>echo/yaws/doc/report.yaws</string>
+	<string>echo/yaws/ebin/bn_dealer_child.erl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -18,7 +18,7 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>200</integer>
+	<integer>215</integer>
 	<key>metaData</key>
 	<dict>
 		<key>Examples/multiThread/counter.erl</key>
@@ -314,9 +314,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>36</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>44</integer>
+				<integer>14</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -372,30 +372,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>28</integer>
+				<integer>1</integer>
 				<key>line</key>
-				<integer>16</integer>
+				<integer>49</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>10</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>23</integer>
-				<key>line</key>
-				<integer>16</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>28</integer>
-				<key>line</key>
-				<integer>16</integer>
-			</dict>
 		</dict>
 		<key>echo/yaws/ebin/bn_common.erl</key>
 		<dict>
@@ -432,9 +416,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>81</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>6</integer>
+				<integer>5</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -446,42 +430,88 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>55</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>73</integer>
+				<integer>14</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>181</integer>
+			</dict>
+		</dict>
+		<key>echo/yaws/ebin/bn_dealer_child.erl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>23</integer>
+				<key>line</key>
+				<integer>0</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>66</integer>
+			<integer>0</integer>
 		</dict>
 		<key>echo/yaws/ebin/bn_report.erl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>2</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>138</integer>
+				<integer>0</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>88</integer>
+			<integer>73</integer>
 		</dict>
 		<key>echo/yaws/ebin/bn_server.erl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>11</integer>
 				<key>line</key>
-				<integer>152</integer>
+				<integer>46</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>126</integer>
+			<integer>25</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>8</integer>
+				<key>line</key>
+				<integer>46</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>13</integer>
+				<key>line</key>
+				<integer>46</integer>
+			</dict>
 		</dict>
 		<key>echo/yaws/ebin/bn_sup.erl</key>
 		<dict>
@@ -623,6 +653,7 @@
 		<string>Examples/simple/math3.erl</string>
 		<string>echo/MYREAME</string>
 		<string>echo/yaws/ebin/bn_dealer.erl</string>
+		<string>echo/yaws/ebin/bn_dealer_child.erl</string>
 		<string>echo/yaws/ebin/Emakefile</string>
 		<string>echo/yaws/ebin/bn_server.erl</string>
 		<string>echo/yaws/ebin/selftest.erl</string>
@@ -654,6 +685,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{210, 75}, {1710, 983}}</string>
+	<string>{{232, 74}, {1681, 984}}</string>
 </dict>
 </plist>

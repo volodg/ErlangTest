@@ -1,0 +1,10 @@
+
+{['bn_common.erl',
+'benchmark.erl',
+'bn_dealer.erl',
+'bn_dealer_child',
+'bn_report.erl',
+'bn_server.erl',
+'bn_sup.erl',
+'selftest.erl',
+'datetime.erl'], [debug_info, {outdir, "."}]}.

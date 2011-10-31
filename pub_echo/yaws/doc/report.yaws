@@ -1,0 +1,48 @@
+
+<erl>
+	% test in shell:
+	% 1. touch report.yaws*; wget -q -a=report.yaws localhost:8000/report.yaws &
+	% 2. tail -f report.yaws.1
+	out(Arg) ->
+		Self = self(),
+		Pid = spawn(fun() ->
+				rec_loop( Arg#arg.clisock )
+			end),
+		[ {header, {content_length, -1}},
+			{header, {"Transfer-Encoding", "chunked"} },
+			{header, {"Connection", "keep-alive"} },
+			{streamcontent_from_pid, "text/plain", Pid}].
+
+	rec_loop(Socket) ->
+		receive
+			{discard, YawsPid} ->
+				yaws_api:stream_process_end(Socket, YawsPid);
+			{ok, YawsPid} ->
+				connect_report(Socket, YawsPid);
+			Other ->
+				{ html, "error" }
+		end,
+		exit(normal).
+
+	connect_report( Socket, YawsPid ) ->
+		ReportPid = bn_report:subscribe(),
+		rec_loop(Socket, YawsPid, ReportPid).
+
+	rec_loop( Socket, YawsPid, ReportPid ) ->
+		receive
+			{ ReportPid, { report, DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount } } ->
+				ReportFormat = "Instr: ~p OpenDatetime: ~p OpenPrice: ~p ClosePrice: ~p MinPrice: ~p MaxPrice: ~p TotalAmount: ~p~n",
+				SendString = io_lib:format( ReportFormat, [ DealerInstrument, OpenDatetime, OpenPrice, ClosePrice, MinPrice, MaxPrice, TotalAmount ] ),
+				yaws_api:stream_process_deliver_chunk(Socket, SendString),
+				rec_loop( Socket, YawsPid, ReportPid );
+			{ ReportPid, finish } ->
+				yaws_api:stream_process_deliver_final_chunk(Socket, <<>>),
+				yaws_api:stream_process_end(closed, YawsPid),
+				exit(normal);
+			{ ReportPid, live_pkg } ->
+				rec_loop( Socket, YawsPid, ReportPid )
+		after 10000 ->
+			io:fwrite( "reconnect after delay~n" ),
+			connect_report( Socket, YawsPid )
+		end.
+</erl>

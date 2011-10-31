@@ -1,6 +1,6 @@
 -module(bn_common).
 
--export([validate_deal_args/3,random_deal/0]).
+-export([validate_deal_args/3,random_deal/0,random_instrument/0]).
 
 -include("bn_config.hrl").
 
@@ -59,9 +59,9 @@ current_datetime() ->
 	datetime:now_datetime().
 
 random_instrument() ->
-	%"echo23".
-	%ETODO - change on random index from list of instruments
-	lists:append( "echo", integer_to_list(random:uniform(10)) ).
+	Length  = length( ?INSTRUMENTS ),
+	[ Instrument | [] ] = lists:sublist(?INSTRUMENTS, random:uniform(Length), 1),
+	Instrument.
 
 random_price() ->
 	erlang:round( ( random:uniform() + 1 ) * 100 ) / 100.

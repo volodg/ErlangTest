@@ -21,14 +21,13 @@
 start_link( InstrumentName, DatetimeSettings ) ->
 	gen_server:start_link(?MODULE, [InstrumentName, DatetimeSettings], []).
 
-%ETODO - should be - {'EXIT', ???} instead of {normal, _Msg}!!!
 deal(DealerPid, Deal) ->
 	case catch( gen_server:call( DealerPid, get_dealer) ) of
-		{normal, _Msg} ->
+		{'EXIT', _Msg} ->
 			{ error, "Dealer already unavailable" };
 		SubDealerPid ->
 			case catch( gen_server:call( SubDealerPid, {deal, Deal}) ) of
-				{normal, _Msg} ->
+				{'EXIT', _Msg} ->
 					{ error, "Dealer already unavailable" };
 				Other ->
 					Other

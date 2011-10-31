@@ -1,3 +1,4 @@
+%Модуль для нагрузочного тестирования
 -module(benchmark).
 
 -export([run/0,trader/0,init/0]).
@@ -20,6 +21,7 @@ init() ->
 	random:seed(A1, A2, A3),
 	start_traders(20000, ?INSTRUMENTS, []).
 
+%запуск нагрузочных тестов
 run() ->
 	spawn_link( benchmark, init, []).
 

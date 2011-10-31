@@ -1,3 +1,4 @@
+%Модуль некоторой общей логики для других модулей системы
 -module(bn_common).
 
 -export([validate_deal_args/3,random_deal/0,random_instrument/0]).
@@ -36,6 +37,7 @@ valid_deal_datetime( Datetime, DatesSettings ) ->
 	end.
 
 %returns true or { false, ValidateErrorDescription }
+%валидация аргументов сделки
 validate_deal_args( Instruments, DatesSettings, Deal ) ->
 	ValidDatetime   = valid_deal_datetime( Deal#deal.datetime, DatesSettings ),
 	ValidInstrument = sets:is_element( Deal#deal.instrument, sets:from_list( Instruments ) ),
@@ -69,6 +71,7 @@ random_price() ->
 random_amount() ->
 	random:uniform(1000).
 
+%генерация случайной валидной сделки
 random_deal() ->
 	#deal{instrument=random_instrument(),
 	 		datetime=current_datetime(),

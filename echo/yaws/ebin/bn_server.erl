@@ -1,3 +1,5 @@
+%Модуль для запуска дилеров, валидирования аргументов,
+%распределение запросов между дилерами по инструментам и датам
 -module(bn_server).
 
 -behaviour(gen_server).
@@ -139,6 +141,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 
 start_datetime() ->
+	%START_DATETIME macros should be used
 	Datetime = datetime:now_datetime(),
 	io:fwrite( "StartDate: ~p~n", [ Datetime ] ),
 	Datetime.
@@ -154,6 +157,7 @@ get_dates_settings( State ) ->
 	{ ok, DateSettings } = dict:find( dete_settings, State ),
 	DateSettings.
 
+%Запуск дилера для инструмента и временного интервала торгов
 run_new_dealer_for_instrument( State, Instrument ) ->
 	DateSettings = get_dates_settings( State ),
 	{ _StartDatetime, _EndDatetime, Duration } = DateSettings,
@@ -165,6 +169,9 @@ run_new_dealer_for_instrument( State, Instrument ) ->
 	{ NewState, DealerPid }.
 
 %validate arguments before calling this method
+%Ищет дилера по инструменту
+%Если не находит - создает нового
+%Иначе возвращает старого если его временной промежуток торгов еще не закончился
 process_get_dealer_for_instrument( State, Deal ) ->
 	FindResult = find_dealer_info( State, Deal#deal.instrument ),
 	{ NewState, InstrumentDealerPid } = case FindResult of

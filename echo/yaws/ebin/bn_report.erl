@@ -1,3 +1,4 @@
+%Модуль для рассылки отчетов подписчикам
 -module(bn_report).
 
 -behaviour(gen_server).
@@ -100,11 +101,13 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
+%для пакеты, для оповвещения что сервер жив
 handle_info(send_live_pkg, State) ->
 	timer:send_after( 5000, send_live_pkg ),
 	lists:foreach(fun(H) -> H ! { self(), live_pkg } end, State),
 	{noreply, State};
 
+%отписываем свалившегося подписчика
 handle_info({'DOWN', _MonitorRef, _Type, Object, _Info}, State) ->
 	NewState = case is_pid( Object ) of
 		true ->

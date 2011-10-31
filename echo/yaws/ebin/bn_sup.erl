@@ -1,3 +1,5 @@
+%Супервизор для bn_server и bn_dealer
+
 %%%-------------------------------------------------------------------
 %%% File    : bn_sup.erl
 %%% Author  : Vladimir Gorbenko <gorbenko.vova@gmail.com>

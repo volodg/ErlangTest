@@ -1,3 +1,5 @@
+%Помощник элемент пула bn_dealer. Обрабатывает сделки на заданном инструменте
+%Отчет отправляет родителю
 -module(bn_dealer_child).
 
 -behaviour(gen_server).
@@ -72,6 +74,9 @@ handle_cast(_Msg, State) ->
 % handle_call({deal,#deal{instrument="echo10"}}, _From, _State) ->
 % 	exit(self(), kill);
 
+%обработка сделки, валидация даты, остальные аргументы
+%провалидированы до
+%отправляем отчет если now >= EndDatetime( окончание временного интервала торгов )
 handle_call({deal,Deal}, _From, State) ->
 	DealerDateRange = get_datetime_setting( State ),
 	{ _StartDatetime, EndDatetime, _DelaySeconds } = DealerDateRange,
@@ -95,6 +100,7 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
+%отправка отчета по таймеру
 handle_info(send_report_part, State) ->
 	send_report( State ),
 	{stop, normal, State};
@@ -138,6 +144,7 @@ get_report_data( State ) ->
 set_report_data( ReportData, State ) ->
 	dict:store( report_data, ReportData, State ).
 
+%обработка сделки, формирование отчета
 process_deal( State, Deal ) ->
 	timer:sleep(10),%simulate difficult calculation
 	{ OpenTime, OpenPrice, _ClosePrice, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),

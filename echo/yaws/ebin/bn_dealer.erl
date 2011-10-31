@@ -1,3 +1,5 @@
+%Дилер - отвечает за распределение нагрузки обработки сделок между dealer_child
+%Собирает все отчеты в кучу и отправляет в bn_report
 -module(bn_dealer).
 
 -behaviour(gen_server).
@@ -81,6 +83,7 @@ handle_cast(_Msg, State) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
+%Возвращаем ребенка из пула для обработки сделки
 handle_call(get_dealer, _From, State) ->
 	case get_reporting( State ) of
 		true ->
@@ -99,6 +102,11 @@ handle_call(_Request, _From, State) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
+%игнорируем преднамеренное завершение ребенка (должно происходить только если отчет по нем получен)
+handle_info({'EXIT',_SubDealerPid,normal}, State) ->
+	{noreply, State};
+
+%обрабатываем непреднамеренное завершение ребенка
 handle_info({'EXIT',SubDealerPid,_Reason}, State) ->
 	NewState = remove_sub_dealer_pid( SubDealerPid, State ),
 	{noreply, NewState};
@@ -164,6 +172,7 @@ create_sub_dealer( State ) ->
 	{ok,SubDealerPid} = bn_dealer_child:start_link( self(), DealerDateRange ),
 	SubDealerPid.
 
+%получить ребенка из пула или создать новый
 get_dealer_child( State ) ->
 	SubDealers = get_sub_dealers( State ),
 	case length( SubDealers ) of
@@ -177,6 +186,7 @@ get_dealer_child( State ) ->
 			{ NewState, Pid }
 	end.
 
+%отправляем суммарный отчет
 send_report( State ) ->
 	{ OpenDatetime, OpenPriceDatetime, ClosePriceDatetime, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
 
@@ -196,6 +206,7 @@ send_report( State ) ->
 			bn_report:notify( Report )
 	end.
 
+%формируем суммарный отчет по всем полченым от детей
 process_sub_dealer_report( Report, State ) ->
 	{ OpenDatetime, OpenPriceDatetime, ClosePriceDatetime, MinPrice, MaxPrice, TotalAmount } = get_report_data( State ),
 	case TotalAmount of
@@ -235,11 +246,14 @@ process_sub_dealer_report( Report, State ) ->
 			end
 	end.
 
+%удаляем пид ребенка отчет по которому получен
+%или если он свалился
 remove_sub_dealer_pid( SubDealerPid, State ) ->
 	SubDealers = get_sub_dealers( State ),
 	NewSubDealers = lists:delete( SubDealerPid, SubDealers ),
 	set_sub_dealers( NewSubDealers, State ).
 
+%собираем отчеты с детей
 collect_report( SubDealerPid, Report, State ) ->
 	NewState1 = process_sub_dealer_report( Report, State ),
 	NewState2 = remove_sub_dealer_pid( SubDealerPid, NewState1 ),

@@ -60,6 +60,7 @@ current_datetime() ->
 
 random_instrument() ->
 	%"echo23".
+	%ETODO - change on random index from list of instruments
 	lists:append( "echo", integer_to_list(random:uniform(10)) ).
 
 random_price() ->

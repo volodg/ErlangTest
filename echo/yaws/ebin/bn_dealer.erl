@@ -21,6 +21,7 @@
 start_link( InstrumentName, DatetimeSettings ) ->
 	gen_server:start_link(?MODULE, [InstrumentName, DatetimeSettings], []).
 
+%ETODO - should be - {'EXIT', ???} instead of {normal, _Msg}!!!
 deal(DealerPid, Deal) ->
 	case catch( gen_server:call( DealerPid, get_dealer) ) of
 		{normal, _Msg} ->
@@ -164,7 +165,6 @@ create_sub_dealer( State ) ->
 	{ok,SubDealerPid} = bn_dealer_child:start_link( self(), DealerDateRange ),
 	SubDealerPid.
 
-%ETODO if child dealer is free it should pass self to begin of list
 get_dealer_child( State ) ->
 	SubDealers = get_sub_dealers( State ),
 	case length( SubDealers ) of
@@ -241,7 +241,6 @@ remove_sub_dealer_pid( SubDealerPid, State ) ->
 	NewSubDealers = lists:delete( SubDealerPid, SubDealers ),
 	set_sub_dealers( NewSubDealers, State ).
 
-%ETODO process exit of child
 collect_report( SubDealerPid, Report, State ) ->
 	NewState1 = process_sub_dealer_report( Report, State ),
 	NewState2 = remove_sub_dealer_pid( SubDealerPid, NewState1 ),
